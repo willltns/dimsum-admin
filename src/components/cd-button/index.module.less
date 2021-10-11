@@ -1,0 +1,32 @@
+.btn {
+  height: @height-base;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  color: @primary-color;
+  border: 1px solid @primary-color;
+  border-radius: @border-radius-base;
+  background-color: transparent;
+  transition: all 200ms;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+
+  &:hover,
+  &:active {
+    color: #fff;
+    background-color: @primary-color;
+  }
+}
+
+.primary {
+  color: #fff;
+  background-color: @primary-color;
+
+  &:hover,
+  &:active {
+    color: @primary-color;
+    background-color: transparent;
+  }
+}

@@ -1,0 +1,162 @@
+.addCoin {
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0 16px;
+  padding-right: 8px;
+
+  > a {
+    font-size: 16px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    margin-left: 12px;
+
+    > span {
+      transform: scale(1.4, 0.8);
+      margin-right: 12px;
+    }
+  }
+
+  > div {
+    user-select: none;
+    cursor: pointer;
+  }
+}
+
+.selected {
+  font-size: 18px;
+  font-weight: 500;
+  color: @primary-color;
+}
+
+.form {
+  padding: 0 24px;
+  background-color: #fff;
+  border-radius: 16px;
+  margin: 0 8px;
+
+  h2 {
+    font-weight: 600;
+    position: relative;
+    right: 11px;
+  }
+
+  &:global {
+    > div.ant-row {
+      justify-content: space-between;
+
+      > div.ant-col {
+        width: 47.5%;
+      }
+    }
+  }
+
+  :global {
+    .ant-form-item-required::before {
+      display: none !important;
+    }
+    .ant-form-item-required::after {
+      content: 'required';
+      display: block !important;
+      color: #ff4d4f;
+      font-size: 13px;
+      position: relative;
+      top: 0;
+      left: 8px;
+      flex: none;
+    }
+  }
+}
+
+.zhMode {
+  position: relative;
+
+  :global {
+    .ant-form-item-required::after {
+      content: '(必填)' !important;
+      font-size: 12px !important;
+      top: 1px;
+    }
+  }
+}
+
+.submitBtn {
+  font-size: 24px;
+  font-weight: 600;
+  height: auto;
+  padding: 5px 30px;
+  transition: all 200ms;
+
+  &:hover {
+    background: @primary-color;
+    color: #fff;
+  }
+}
+
+.linkTip {
+  opacity: 0;
+  color: #ff4d4f;
+  font-size: 14px;
+  margin-left: 6px;
+  font-weight: normal;
+}
+
+.paBtns {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  & > button {
+    width: 200px;
+
+    &:first-of-type {
+      margin-bottom: 24px;
+    }
+  }
+}
+
+.infoFilled {
+  border-color: @primary-color !important;
+  color: rgba(0, 0, 0, 0.85) !important;
+  background: linear-gradient(0deg, @primary-color, transparent) !important;
+}
+
+.paModal {
+  :global {
+    .ant-modal-body {
+      display: flex;
+      flex-direction: column;
+
+      > button {
+        width: 80px;
+        margin: 24px auto 0;
+      }
+    }
+  }
+}
+
+.modalHead {
+  display: flex;
+  justify-content: space-between;
+}
+
+@media screen and (max-width: 666px) {
+  .form {
+    &:global {
+      > .ant-row {
+        flex-direction: column;
+
+        > .ant-col {
+          width: 100% !important;
+          margin-bottom: 24px;
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+.sidebar {
+  background-color: #fff;
+  height: calc(100vh - 60px);
+  position: sticky;
+  top: 60px;
+
+  // 页面内容
+  + section {
+    width: 100%;
+    margin: 24px;
+    padding: 16px;
+    border-radius: 5px;
+    background-color: #fff;
+    overflow: hidden;
+  }
+
+  :global {
+    .ant-menu {
+      transition: none !important;
+    }
+
+    .ant-menu-item {
+      transition: none !important;
+      padding: 0 20px !important;
+    }
+
+    .ant-menu-inline-collapsed {
+      width: 57px !important;
+    }
+  }
+}
+
+.colBtn {
+  width: 100%;
+  margin-bottom: 24px;
+}

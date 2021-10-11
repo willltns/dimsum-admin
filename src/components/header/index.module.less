@@ -1,0 +1,58 @@
+.header {
+  z-index: 999;
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 24px;
+  border-bottom: 1px solid #f9f9f9;
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+
+  :global {
+    a.logo {
+      font-size: 32px;
+      font-weight: bold;
+      color: @primary-color !important;
+    }
+  }
+}
+
+.admin {
+  img {
+    width: 40px;
+    height: 40px;
+    user-select: none;
+    cursor: pointer;
+  }
+}
+
+.charAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-style: normal;
+  width: 40px;
+  height: 40px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 5px;
+  background-color: @primary-color;
+  user-select: none;
+  cursor: pointer;
+}
+
+.logoutBtn {
+  padding: 4px 12px;
+  background: #fff;
+  border-radius: 4px;
+  user-select: none;
+  cursor: pointer;
+  box-shadow: 0 0 5px rgb(0 0 0 / 12%);
+
+  &:hover {
+    color: @primary-color;
+  }
+}
