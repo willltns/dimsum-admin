@@ -1,58 +1,66 @@
 // import ss from './index.module.less'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Button, DatePicker, Form, Input, Modal, Table, Space, Popconfirm } from 'antd'
 import { promoCoinStatusList, promoCoinStatusMap } from '@/consts'
 import moment from 'moment'
+
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import XhrCoinSelect from '@/components/xhr-coin-select'
+import { fetchPromoCoinList, addPromoCoin, updatePromoCoin, updatePromoCoinStatus } from '@/pages/advert/xhr'
 
 const data = [
   {
     id: 1,
+    coinId: 113,
     coinName: 'https://',
     coinSymbol: 'https://',
-    promoStatus: 20,
-    promoPrice: 10,
-    promoRemark: 10,
-    promoTime: '2020-12-20 22:00:00',
-    unpromoTime: '2020-12-22 22:00:00',
+    status: 20,
+    shelfTime: '2020-12-20 22:00:00',
+    offShelfTime: '2020-12-22 22:00:00',
+    price: 10,
     contactEmail: 'wwaaaa22ww@qq.com',
-    contactTelegram: '@mc_show_er',
-  },
-  {
-    id: 3,
-    coinName: 'https://',
-    coinSymbol: 'https://',
-    promoStatus: 10,
-    promoPrice: 10,
-    promoRemark: 10,
-    promoTime: '2020-12-20 22:00:00',
-    unpromoTime: '2020-12-22 22:00:00',
-    contactEmail: 'wwaaaa22ww@qq.com',
+    contactTg: '@mc_show_er',
+    remark: 10,
   },
   {
     id: 4,
+    coinId: 113,
     coinName: 'https://',
     coinSymbol: 'https://',
-    promoStatus: 30,
-    promoPrice: 10,
-    promoRemark: 10,
-    promoTime: '2020-12-20 22:00:00',
-    unpromoTime: '2020-12-22 22:00:00',
-    contactTelegram: '@mc_show_er',
+    status: 10,
+    shelfTime: '2020-12-20 22:00:00',
+    offShelfTime: '2020-12-22 22:00:00',
+    price: 10,
+    contactEmail: 'wwaaaa22ww@qq.com',
+    contactTg: '@mc_show_er',
+    remark: 10,
   },
   {
-    id: 5,
+    id: 3,
+    coinId: 113,
     coinName: 'https://',
     coinSymbol: 'https://',
-    promoStatus: 20,
-    promoPrice: 10,
-    promoRemark: '123243r4ff',
-    promoTime: '2020-12-20 22:00:00',
-    unpromoTime: '2020-12-22 22:00:00',
+    status: 30,
+    shelfTime: '2020-12-20 22:00:00',
+    offShelfTime: '2020-12-22 22:00:00',
+    price: 10,
     contactEmail: 'wwaaaa22ww@qq.com',
-    contactTelegram: '@mc_show_er',
+    contactTg: '@mc_show_er',
+    remark: 10,
+  },
+  {
+    id: 2,
+    coinId: 113,
+    coinName: 'https://',
+    coinSymbol: 'https://',
+    status: 20,
+    shelfTime: '2020-12-20 22:00:00',
+    offShelfTime: '2020-12-22 22:00:00',
+    price: 10,
+    contactEmail: 'wwaaaa22ww@qq.com',
+    contactTg: '@mc_show_er',
+    remark: 'ddddvvv',
   },
 ]
 
@@ -62,50 +70,114 @@ const PromoCoinMGMT = () => {
     current: 1,
     pageSize: 10,
     dataSource: data,
-    filteredPromoStatus: null,
+    filteredStatus: null,
     sortedField: null,
     sortedOrder: null,
     coinName: '',
     coinSymbol: '',
     contactEmail: '',
     contactTelegram: '',
-    promoRemark: '',
+    remark: '',
     modalVisible: false,
-    modifyId: null,
+    curModify: null,
+    tableLoading: false,
+    editLoading: false,
   })
   const {
     total,
     current,
     pageSize,
     dataSource,
-    filteredPromoStatus,
+    filteredStatus,
     sortedField,
     sortedOrder,
+    coinId,
     coinName,
     coinSymbol,
     contactEmail,
-    contactTelegram,
-    promoRemark,
+    contactTg,
+    remark,
     modalVisible,
-    modifyId,
+    curModify,
+    tableLoading,
+    editLoading,
   } = state
 
-  useEffect(() => {
-    console.log('request', state)
+  const handlePromoCoinList = useCallback(() => {
+    setState((state) => ({ ...state, tableLoading: true }))
+    const params = {
+      pageNo: current,
+      pageSize,
+      status: filteredStatus,
+      sortedField,
+      sortedOrder,
+      coinId,
+      coinName,
+      coinSymbol,
+      contactEmail,
+      contactTg,
+      remark,
+    }
+
+    fetchPromoCoinList(params)
+      .then((res) => {
+        console.log(res)
+        setState((state) => ({ ...state, tableLoading: false }))
+      })
+      .catch(() => setState((state) => ({ ...state, tableLoading: false })))
   }, [
     current,
     pageSize,
-    filteredPromoStatus,
+    filteredStatus,
     sortedField,
     sortedOrder,
+    coinId,
     coinName,
     coinSymbol,
     contactEmail,
-    contactTelegram,
-    promoRemark,
+    contactTg,
+    remark,
   ])
 
+  useEffect(() => {
+    handlePromoCoinList()
+  }, [handlePromoCoinList])
+
   const [form] = Form.useForm()
+
+  const handleEditOk = async () => {
+    setState((state) => ({ ...state, editLoading: true }))
+    try {
+      const values = await form.validateFields()
+      const { timeRange, ...params } = values
+
+      params.shelfTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')
+      params.offShelfTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
+
+      if (curModify) {
+        params.id = curModify.id
+        await updatePromoCoin(params)
+      } else {
+        await addPromoCoin(params)
+      }
+      setState((state) => ({ ...state, editLoading: false }))
+      handlePromoCoinList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
+
+  const handleUpdateStatus = async (id, status) => {
+    setState((state) => ({ ...state, editLoading: true }))
+
+    try {
+      await updatePromoCoinStatus({ id, status })
+      setState((state) => ({ ...state, editLoading: false }))
+      handlePromoCoinList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
 
   const pagination = {
     total,
@@ -119,27 +191,29 @@ const PromoCoinMGMT = () => {
 
   const onTableChange = (pagination, filters, sorter) => {
     const { current, pageSize } = pagination
-    const { promoStatus } = filters
+    const { status } = filters
     const { field, order } = sorter
 
     setState((state) => ({
       ...state,
-      current,
+      current: state.pageSize === pageSize ? current : 1,
       pageSize,
-      filteredPromoStatus: promoStatus?.[0],
-      sortedField: field,
+      filteredStatus: status?.[0],
       sortedOrder: order,
+      sortedField: order ? field : null,
     }))
   }
 
-  const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value }))
+  const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value, current: 1 }))
 
   const columns = [
+    //{ title: 'id', dataIndex: 'id', fixed: 'left', width: 80 },
     {
-      title: 'id',
-      dataIndex: 'id',
+      title: '代币id',
+      dataIndex: 'coinId',
       fixed: 'left',
-      width: 80,
+      width: 150,
+      ...getColumnSearchProps('代币名称', 'coinId', handleInputSearch, coinId),
     },
     {
       title: '代币名称',
@@ -156,33 +230,29 @@ const PromoCoinMGMT = () => {
     },
     {
       title: '状态',
-      dataIndex: 'promoStatus',
+      dataIndex: 'status',
       width: 88,
-      filteredValue: filteredPromoStatus ? [filteredPromoStatus] : null,
+      filteredValue: filteredStatus ? [filteredStatus] : null,
       filterMultiple: false,
       filters: promoCoinStatusList,
       render: (t) => promoCoinStatusMap[t]?.text,
     },
     {
       title: '上架时间',
-      dataIndex: 'promoTime',
+      dataIndex: 'shelfTime',
       width: 170,
       sorter: true,
-      sortOrder: sortedField === 'promoTime' ? sortedOrder : false,
+      sortOrder: sortedField === 'shelfTime' ? sortedOrder : false,
     },
     {
       title: '下架时间',
-      dataIndex: 'unpromoTime',
+      dataIndex: 'offShelfTime',
       width: 170,
       sorter: true,
-      sortOrder: sortedField === 'unpromoTime' ? sortedOrder : false,
+      sortOrder: sortedField === 'offShelfTime' ? sortedOrder : false,
     },
 
-    {
-      title: '价格',
-      dataIndex: 'promoPrice',
-      width: 120,
-    },
+    { title: '价格', dataIndex: 'price', width: 120 },
     {
       title: '联系邮箱',
       dataIndex: 'contactEmail',
@@ -191,15 +261,15 @@ const PromoCoinMGMT = () => {
     },
     {
       title: '联系电报',
-      dataIndex: 'contactTelegram',
+      dataIndex: 'contactTg',
       width: 200,
-      ...getColumnSearchProps('联系电报', 'contactTelegram', handleInputSearch, contactTelegram),
+      ...getColumnSearchProps('联系电报', 'contactTg', handleInputSearch, contactTg),
     },
     {
       title: '备注',
-      dataIndex: 'promoRemark',
+      dataIndex: 'remark',
       width: 200,
-      ...getColumnSearchProps('备注', 'promoRemark', handleInputSearch, promoRemark),
+      ...getColumnSearchProps('备注', 'remark', handleInputSearch, remark),
     },
 
     {
@@ -213,25 +283,30 @@ const PromoCoinMGMT = () => {
           <Button
             type="link"
             size="small"
-            onClick={() => setState((state) => ({ ...state, modalVisible: true, modifyId: r.id }))}
+            onClick={() => {
+              setState((state) => ({ ...state, modalVisible: true, curModify: r }))
+              const fields = { ...r }
+              fields.timeRange = [moment(r.shelfTime), moment(r.offShelfTime)]
+              setTimeout(() => form.setFieldsValue({ ...fields }))
+            }}
           >
             修改
           </Button>
           <Popconfirm
             title={`上架 $${r.coinSymbol} ？`}
-            disabled={+r.promoStatus === 20}
-            onConfirm={() => console.log(r.id)}
+            disabled={+r.status === 20 || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, 20)}
           >
-            <Button type="link" size="small" disabled={+r.promoStatus === 20}>
+            <Button type="link" size="small" disabled={+r.status === 20 || editLoading}>
               上架
             </Button>
           </Popconfirm>
           <Popconfirm
             title={`下架 $${r.coinSymbol} ？`}
-            disabled={+r.promoStatus === 30}
-            onConfirm={() => console.log(r.id)}
+            disabled={+r.status === 30 || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, 30)}
           >
-            <Button type="text" size="small" disabled={+r.promoStatus === 30}>
+            <Button type="text" size="small" disabled={+r.status === 30 || editLoading}>
               下架
             </Button>
           </Popconfirm>
@@ -253,6 +328,7 @@ const PromoCoinMGMT = () => {
         rowKey="id"
         size="small"
         columns={columns}
+        loading={tableLoading}
         pagination={pagination}
         dataSource={dataSource}
         onChange={onTableChange}
@@ -265,20 +341,18 @@ const PromoCoinMGMT = () => {
         width={600}
         keyboard={false}
         maskClosable={false}
-        title={modifyId ? '修改推广代币' : '添加推广代币'}
+        title={curModify?.id ? '修改推广代币' : '添加推广代币'}
         visible={modalVisible}
-        onCancel={() => setState((state) => ({ ...state, modalVisible: false, modifyId: null }))}
+        closable={!editLoading}
+        okButtonProps={{ loading: editLoading }}
+        cancelButtonProps={{ disabled: editLoading }}
+        onCancel={() => setState((state) => ({ ...state, modalVisible: false, curModify: null }))}
         afterClose={form.resetFields}
-        onOk={() => {
-          form
-            .validateFields()
-            .then((values) => console.log(values))
-            .catch(() => {})
-        }}
+        onOk={handleEditOk}
       >
         <Form form={form} labelCol={{ span: 5 }} wrapperCol={{ span: 17 }}>
           <Form.Item label="代币" name="coinId" rules={[{ required: true }]}>
-            <XhrCoinSelect disabled={!!modifyId} />
+            <XhrCoinSelect disabled={!!curModify?.id} />
           </Form.Item>
 
           <Form.Item label="上架时间段" name="timeRange" rules={[{ required: true }]}>
@@ -292,11 +366,11 @@ const PromoCoinMGMT = () => {
             />
           </Form.Item>
 
-          <Form.Item label="价格" name="promoPrice" rules={[{ required: true }]}>
+          <Form.Item label="价格" name="price" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item label="备注" name="promoRemark">
+          <Form.Item label="备注" name="remark">
             <Input.TextArea />
           </Form.Item>
         </Form>

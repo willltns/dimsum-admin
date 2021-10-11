@@ -1,6 +1,6 @@
 import ss from './index.module.less'
 
-import React from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Button, Modal, Space, Table, Form, Input, Radio, DatePicker, Col, Popconfirm, Divider } from 'antd'
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 
@@ -9,11 +9,12 @@ import moment from 'moment'
 import XhrCoinSelect from '@/components/xhr-coin-select'
 import { votePromoTypeList, votePromoStatusList, votePromoTypeMap, votePromoStatusMap } from './consts'
 import VoteModifier from '@/pages/vote-promo/VoteModifier'
+import { addVotePromo, fetchVotePromoDetail, fetchVotePromoList, updateVotePromoStatus } from '@/pages/vote-promo/xhr'
 
 const data = [
   {
     id: 1,
-    voteTheme: '哪个代币获得两天免费推广？',
+    voteName: '哪个代币获得两天免费推广？',
     type: 10,
     status: 10,
     startTime: '2020-12-12 12:00:00',
@@ -22,7 +23,7 @@ const data = [
   },
   {
     id: 2,
-    voteTheme: '哪个代币获得两天免费推广？',
+    voteName: '哪个代币获得两天免费推广？',
     type: 20,
     status: 20,
     startTime: '2020-12-12 12:00:00',
@@ -31,7 +32,7 @@ const data = [
   },
   {
     id: 4,
-    voteTheme: '哪个代币获得两天免费推广？',
+    voteName: '哪个代币获得两天免费推广？',
     type: 20,
     status: 30,
     startTime: '2020-12-12 12:00:00',
@@ -40,7 +41,7 @@ const data = [
   },
   {
     id: 5,
-    voteTheme: '哪个代币获得两天免费推广？',
+    voteName: '哪个代币获得两天免费推广？',
     type: 20,
     status: 40,
     startTime: '2020-12-12 12:00:00',
@@ -49,7 +50,7 @@ const data = [
   },
   {
     id: 6,
-    voteTheme: '哪个代币获得两天免费推广？',
+    voteName: '哪个代币获得两天免费推广？',
     type: 20,
     status: 50,
     startTime: '2020-12-12 12:00:00',
@@ -58,8 +59,28 @@ const data = [
   },
 ]
 
+const vv = {
+  id: 1,
+  type: 20,
+  voteName: '是生生世世',
+  startTime: '2022-12-12 12:12:12',
+  endTime: '2022-12-12 12:12:12',
+  optionList: [
+    {
+      optionId: 2,
+      option: '点都德',
+      upvotes: 555,
+    },
+    {
+      optionId: 3,
+      option: '点都德',
+      upvotes: 555,
+    },
+  ],
+}
+
 const VotePromo = () => {
-  const [state, setState] = React.useState({
+  const [state, setState] = useState({
     total: 50,
     current: 1,
     pageSize: 10,
@@ -68,11 +89,14 @@ const VotePromo = () => {
     filteredStatus: null,
     sortedField: null,
     sortedOrder: null,
-    voteTheme: '',
+    voteName: '',
     remark: '',
     modalVisible: false,
     voteType: 10,
-    voteDetail: null,
+    votePromoDetail: null,
+    tableLoading: false,
+    editLoading: false,
+    detailLoading: false,
   })
   const {
     total,
@@ -83,14 +107,81 @@ const VotePromo = () => {
     filteredStatus,
     sortedField,
     sortedOrder,
-    voteTheme,
+    voteName,
     remark,
     modalVisible,
     voteType,
-    voteDetail,
+    votePromoDetail,
+    tableLoading,
+    editLoading,
+    detailLoading,
   } = state
 
+  const handleVotePromoList = useCallback(() => {
+    setState((state) => ({ ...state, tableLoading: true }))
+    const params = {
+      pageNo: current,
+      pageSize,
+      type: filteredType,
+      status: filteredStatus,
+      sortedField,
+      sortedOrder,
+      voteName,
+      remark,
+    }
+
+    fetchVotePromoList(params)
+      .then((res) => {
+        console.log(res)
+        setState((state) => ({ ...state, tableLoading: false }))
+      })
+      .catch(() => setState((state) => ({ ...state, tableLoading: false })))
+  }, [current, pageSize, filteredType, filteredStatus, sortedField, sortedOrder, voteName, remark])
+
+  useEffect(() => {
+    handleVotePromoList()
+  }, [handleVotePromoList])
+
   const [form] = Form.useForm()
+
+  const handleAddOk = async () => {
+    setState((state) => ({ ...state, editLoading: true }))
+    try {
+      const values = await form.validateFields()
+      const { timeRange, ...params } = values
+
+      params.startTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')
+      params.endTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
+
+      await addVotePromo(params)
+      setState((state) => ({ ...state, editLoading: false }))
+      handleVotePromoList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
+
+  const handleUpdateStatus = async (id, status) => {
+    setState((state) => ({ ...state, editLoading: true }))
+
+    try {
+      await updateVotePromoStatus({ id, status })
+      setState((state) => ({ ...state, editLoading: false }))
+      handleVotePromoList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
+
+  const handleVotePromoDetail = async (id) => {
+    setState((state) => ({ ...state, detailLoading: true }))
+    try {
+      const res = await fetchVotePromoDetail({ id })
+      setState((state) => ({ ...state, detailLoading: false, votePromoDetail }))
+    } catch (err) {
+      setState((state) => ({ ...state, detailLoading: false, votePromoDetail: { ...vv } }))
+    }
+  }
 
   const pagination = {
     total,
@@ -113,26 +204,21 @@ const VotePromo = () => {
       pageSize,
       filteredType: type?.[0],
       filteredStatus: status?.[0],
-      sortedField: field,
       sortedOrder: order,
+      sortedField: order ? field : null,
     }))
   }
 
-  const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value }))
+  const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value, current: 1 }))
 
   const columns = [
+    { title: 'id', dataIndex: 'id', fixed: 'left', width: 80 },
     {
-      title: 'id',
-      dataIndex: 'id',
-      fixed: 'left',
-      width: 80,
-    },
-    {
-      title: '主题',
-      dataIndex: 'voteTheme',
+      title: '投票主题',
+      dataIndex: 'voteName',
       fixed: 'left',
       width: 150,
-      ...getColumnSearchProps('投票主题', 'voteTheme', handleInputSearch, voteTheme),
+      ...getColumnSearchProps('投票主题', 'voteName', handleInputSearch, voteName),
     },
     {
       title: '类型',
@@ -180,33 +266,33 @@ const VotePromo = () => {
       fixed: 'right',
       render: (_, r) => (
         <Space>
-          <Button type="link" size="small" onClick={() => setState((state) => ({ ...state, voteDetail: { id: 1 } }))}>
-            修改
+          <Button type="link" size="small" disabled={detailLoading} onClick={() => handleVotePromoDetail(r.id)}>
+            详情
           </Button>
           <Popconfirm
             title={`激活 id 为 ${r.id} 的投票 ？`}
-            disabled={+r.status !== 10}
-            onConfirm={() => console.log(r.id)}
+            disabled={+r.status !== 10 || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, 20)}
           >
-            <Button type="link" size="small" disabled={+r.status !== 10}>
+            <Button type="link" size="small" disabled={+r.status !== 10 || editLoading}>
               激活
             </Button>
           </Popconfirm>
           <Popconfirm
             title={`完成 id 为 ${r.id} 的投票 ？`}
-            disabled={+r.status !== 30}
-            onConfirm={() => console.log(r.id)}
+            disabled={+r.status !== 30 || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, 40)}
           >
-            <Button type="link" size="small" disabled={+r.status !== 30}>
+            <Button type="link" size="small" disabled={+r.status !== 30 || editLoading}>
               完成
             </Button>
           </Popconfirm>
           <Popconfirm
             title={`取消 id 为 ${r.id} 的投票 ？`}
-            disabled={+r.status === 50}
-            onConfirm={() => console.log(r.id)}
+            disabled={+r.status === 50 || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, 50)}
           >
-            <Button type="text" size="small" disabled={+r.status === 50}>
+            <Button type="text" size="small" disabled={+r.status === 50 || editLoading}>
               取消
             </Button>
           </Popconfirm>
@@ -229,6 +315,7 @@ const VotePromo = () => {
         rowKey="id"
         size="small"
         columns={columns}
+        loading={tableLoading}
         pagination={pagination}
         dataSource={dataSource}
         onChange={onTableChange}
@@ -244,15 +331,13 @@ const VotePromo = () => {
         maskClosable={false}
         title="添加投票推广"
         visible={modalVisible}
-        afterClose={form.resetFields}
+        closable={!editLoading}
+        okButtonProps={{ loading: editLoading }}
+        cancelButtonProps={{ disabled: editLoading }}
         bodyStyle={{ height: 520, overflowY: 'auto' }}
         onCancel={() => setState((state) => ({ ...state, modalVisible: null, voteType: 10 }))}
-        onOk={() =>
-          form
-            .validateFields()
-            .then(console.log)
-            .catch(() => {})
-        }
+        afterClose={form.resetFields}
+        onOk={handleAddOk}
       >
         <Radio.Group
           style={{ margin: '0 0 32px 116px' }}
@@ -261,31 +346,36 @@ const VotePromo = () => {
             form.resetFields()
 
             setTimeout(() => {
-              form.setFieldsValue(voteType === 10 ? { theme: '哪个代币获得两天免费推广？' } : { theme: '' })
+              form.setFieldsValue(voteType === 10 ? { voteName: '哪个代币获得两天免费推广？' } : { voteName: '' })
               setState((state) => ({ ...state, voteType }))
             })
           }}
           value={voteType}
         >
-          <Radio value={10}>代币投票</Radio>
-          <Radio value={20}>自定义投票</Radio>
+          {votePromoTypeList.map((item) => (
+            <Radio value={item.value} key={item.value}>
+              {item.text}
+            </Radio>
+          ))}
         </Radio.Group>
         <Form
           form={form}
           autoComplete="off"
           labelCol={{ span: 5 }}
           wrapperCol={{ span: 16 }}
-          initialValues={{ theme: '哪个代币获得两天免费推广？' }}
+          initialValues={{ voteName: '哪个代币获得两天免费推广？' }}
         >
-          <Form.Item label="投票主题" name="theme" rules={[{ required: true }]}>
+          <Form.Item label="投票主题" name="voteName" rules={[{ required: true }]}>
             <Input min={1} style={{ width: '100%' }} placeholder="请输入投票主题" />
           </Form.Item>
           <Form.List
-            name="options"
+            name="optionList"
             rules={[
               {
-                validator: async (_, names) =>
-                  names?.length < 2 ? Promise.reject(new Error('至少添加两个选项内容')) : Promise.resolve(),
+                validator: async (_, optionList) =>
+                  !optionList || optionList?.length < 2
+                    ? Promise.reject(new Error('至少添加两个选项内容'))
+                    : Promise.resolve(),
               },
             ]}
           >
@@ -358,42 +448,40 @@ const VotePromo = () => {
         destroyOnClose
         keyboard={false}
         maskClosable={false}
-        visible={!!voteDetail?.id}
-        onCancel={() => setState((state) => ({ ...state, voteDetail: null }))}
+        visible={!!votePromoDetail}
+        onCancel={() => setState((state) => ({ ...state, votePromoDetail: null }))}
       >
-        <div>投票主题：&emsp;哪个代币获得两天免费推广？</div>
+        <div>投票主题：&emsp;{votePromoDetail?.voteName}</div>
         <p />
-        <div>投票时间：&emsp;2022-10-10 11:00:00 ~ 2022-10-12 11:00:00</div>
+        <div>
+          投票时间：&emsp;{votePromoDetail?.startTime} ~ {votePromoDetail?.endTime}
+        </div>
         <Divider style={{ margin: '16px 0' }} />
         <p />
-        <div className={ss.option}>
-          <p>
-            选项 1：<b>Baby Doge Coin ($BDC) 100</b>
-          </p>
-          <div>
-            <span>
-              百分比: <b>63.2%</b>
-            </span>
-            <span>
-              投票数: <b>1121</b>
-            </span>
-            <VoteModifier coinId={100} sort={1} />
+
+        {votePromoDetail?.optionList?.map((item, index) => (
+          <div className={ss.option} key={item.optionId}>
+            <p>
+              选项 {index + 1}：
+              <b>
+                {votePromoDetail?.type === 10 ? `${item.coinName} ($${item.coinSymbol}) ${item.coinId}` : item.option}
+              </b>
+            </p>
+            <div>
+              <span>
+                百分比: <b>63.2%</b> {/* TODO */}
+              </span>
+              <span>
+                投票数: <b>{item.upvotes}</b>
+              </span>
+              <VoteModifier
+                No={index + 1}
+                optionId={item.optionId}
+                cbSuccess={() => handleVotePromoDetail(votePromoDetail.id)}
+              />
+            </div>
           </div>
-        </div>
-        <div className={ss.option}>
-          <p>
-            选项 2：<b>Baby Doge Coin ($BDC) 101</b>
-          </p>
-          <div>
-            <span>
-              百分比: <b>13.2%</b>
-            </span>
-            <span>
-              投票数: <b>112</b>
-            </span>
-            <VoteModifier coinId={101} sort={2} />
-          </div>
-        </div>
+        ))}
       </Modal>
     </section>
   )

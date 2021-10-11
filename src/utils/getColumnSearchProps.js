@@ -22,6 +22,16 @@ export const getColumnSearchProps = (title, dataIndex, handleSearch, searchValue
       />
       <Space>
         <Button
+          onClick={() => {
+            clearFilters()
+            handleSearch(dataIndex, '')
+          }}
+          size="small"
+          style={{ width: 90 }}
+        >
+          重置
+        </Button>
+        <Button
           type="primary"
           onClick={() => {
             confirm()
@@ -34,16 +44,6 @@ export const getColumnSearchProps = (title, dataIndex, handleSearch, searchValue
           style={{ width: 90 }}
         >
           搜索
-        </Button>
-        <Button
-          onClick={() => {
-            clearFilters()
-            handleSearch(dataIndex, '')
-          }}
-          size="small"
-          style={{ width: 90 }}
-        >
-          重置
         </Button>
       </Space>
     </div>

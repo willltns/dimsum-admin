@@ -1,8 +1,10 @@
 import React from 'react'
 import { Button, Input, Popover, Space } from 'antd'
 
+import { addOptionVotes } from '@/pages/vote-promo/xhr'
+
 function VoteModifier(props) {
-  const { coinId, sort } = props
+  const { No, optionId, cbSuccess } = props
 
   const [state, setState] = React.useState({ visible: false, voteNum: '', loading: false })
   const { visible, voteNum, loading } = state
@@ -14,17 +16,21 @@ function VoteModifier(props) {
 
   const onCancel = () => setState({ visible: false, voteNum: '', loading: false })
 
-  const onConfirm = () => {
+  const onConfirm = async () => {
     if (!voteNum) return
     setState((state) => ({ ...state, loading: true }))
-
-    console.log(voteNum, coinId)
-    setTimeout(onCancel, 2000)
+    try {
+      await addOptionVotes({ optionId, upvotes: voteNum })
+      cbSuccess()
+      onCancel()
+    } catch (err) {
+      setState({ loading: false })
+    }
   }
 
   const popContent = (
     <Space>
-      <Input disabled={loading} placeholder={`选项${sort} 添加多少票?`} value={voteNum} onChange={onVoteChange} />
+      <Input disabled={loading} placeholder={`选项${No} 添加多少票?`} value={voteNum} onChange={onVoteChange} />
       <Button size="small" onClick={onCancel} disabled={loading} style={{ width: 70 }}>
         取消
       </Button>

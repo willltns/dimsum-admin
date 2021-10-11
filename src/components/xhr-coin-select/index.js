@@ -12,7 +12,7 @@ function XhrCoinSelect(props) {
     <Select allowClear showSearch placeholder="输入代币名称或符号查找" onSearch={debounce(console.log, 600)} {...props}>
       {list.map((item) => (
         <Select.Option value={item.id} key={item.id}>
-          {item.coinName} (${item.coinSymbol})_{item.id}
+          {item.coinName} (${item.coinSymbol}) {item.id}
         </Select.Option>
       ))}
     </Select>

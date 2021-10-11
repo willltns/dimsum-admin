@@ -3,8 +3,8 @@
 import { Tabs } from 'antd'
 
 import React from 'react'
-import BannerMGMT from '@/pages/advert/banner-mgmt'
-import PromoCoinMGMT from '@/pages/advert/promo-coin-mgmt'
+import BannerMGMT from './banner-mgmt'
+import PromoCoinMGMT from './promo-coin-mgmt'
 
 const Home = () => {
   return (

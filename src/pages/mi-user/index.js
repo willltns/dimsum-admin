@@ -1,24 +1,25 @@
 // import ss from './index.module.less'
 
-import React from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Button, Modal, Space, Table, Form, Input, Popconfirm } from 'antd'
 
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { miUserStatusList, miUserStatusMap } from './consts'
+import { addUser, fetchUserList, updateUser, updateUserStatus } from '@/pages/mi-user/xhr'
 
 const data = [
   {
     id: 1,
-    userName: 'will',
-    status: 20,
+    name: 'Will',
+    status: 10,
     createTime: '2020-12-12 12:00:00',
     modifyTime: '2020-12-12 12:00:00',
     remark: '范德萨发个',
   },
   {
     id: 2,
-    userName: 'james',
-    status: 10,
+    name: 'James',
+    status: 20,
     createTime: '2020-12-12 12:00:00',
     modifyTime: '2020-11-01 05:55:00',
     remark: '反反复复',
@@ -26,20 +27,81 @@ const data = [
 ]
 
 const MiUser = () => {
-  const [state, setState] = React.useState({
+  const [state, setState] = useState({
     total: 50,
     current: 1,
     pageSize: 10,
     dataSource: data,
     filteredStatus: null,
-    userName: '',
+    name: '',
     remark: '',
     modalVisible: false,
-    modifyUser: null,
+    curModify: null,
+    tableLoading: false,
+    editLoading: false,
   })
-  const { total, current, pageSize, dataSource, filteredStatus, userName, remark, modalVisible, modifyUser } = state
+  const {
+    total,
+    current,
+    pageSize,
+    dataSource,
+    filteredStatus,
+    name,
+    remark,
+    modalVisible,
+    curModify,
+    tableLoading,
+    editLoading,
+  } = state
+
+  const handleUserList = useCallback(() => {
+    setState((state) => ({ ...state, tableLoading: true }))
+    const params = { pageNo: current, pageSize, name, remark, status: filteredStatus }
+
+    fetchUserList(params)
+      .then((res) => {
+        console.log(res)
+        setState((state) => ({ ...state, tableLoading: false }))
+      })
+      .catch(() => setState((state) => ({ ...state, tableLoading: false })))
+  }, [current, pageSize, name, remark, filteredStatus])
+
+  useEffect(() => {
+    handleUserList()
+  }, [handleUserList])
 
   const [form] = Form.useForm()
+
+  const handleEditOk = async () => {
+    setState((state) => ({ ...state, editLoading: true }))
+    try {
+      const values = await form.validateFields()
+      const params = { ...values }
+
+      if (curModify) {
+        params.id = curModify.id
+        await updateUser(params)
+      } else {
+        await addUser(params)
+      }
+      setState((state) => ({ ...state, editLoading: false }))
+      handleUserList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
+
+  const handleUpdateStatus = async (id, status) => {
+    setState((state) => ({ ...state, editLoading: true }))
+
+    try {
+      await updateUserStatus({ id, status })
+      setState((state) => ({ ...state, editLoading: false }))
+      handleUserList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
 
   const pagination = {
     total,
@@ -57,27 +119,22 @@ const MiUser = () => {
 
     setState((state) => ({
       ...state,
-      current,
+      current: state.pageSize === pageSize ? current : 1,
       pageSize,
       filteredStatus: status?.[0],
     }))
   }
 
-  const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value }))
+  const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value, current: 1 }))
 
   const columns = [
-    {
-      title: 'id',
-      dataIndex: 'id',
-      fixed: 'left',
-      width: 80,
-    },
+    { title: 'id', dataIndex: 'id', fixed: 'left', width: 80 },
     {
       title: '用户',
-      dataIndex: 'userName',
+      dataIndex: 'name',
       fixed: 'left',
       width: 150,
-      ...getColumnSearchProps('用户', 'userName', handleInputSearch, userName),
+      ...getColumnSearchProps('用户', 'name', handleInputSearch, name),
     },
     {
       title: '状态',
@@ -88,16 +145,8 @@ const MiUser = () => {
       filters: miUserStatusList,
       render: (t) => miUserStatusMap[t]?.text,
     },
-    {
-      title: '添加时间',
-      width: 170,
-      dataIndex: 'createTime',
-    },
-    {
-      title: '修改时间',
-      width: 170,
-      dataIndex: 'modifyTime',
-    },
+    { title: '添加时间', width: 170, dataIndex: 'createTime' },
+    { title: '修改时间', width: 170, dataIndex: 'modifyTime' },
     {
       title: '备注',
       width: 200,
@@ -116,19 +165,27 @@ const MiUser = () => {
             type="link"
             size="small"
             onClick={() => {
-              form.setFieldsValue({ ...r })
-              setState((state) => ({ ...state, modalVisible: true, modifyUser: r }))
+              setState((state) => ({ ...state, modalVisible: true, curModify: r }))
+              setTimeout(() => form.setFieldsValue({ ...r }))
             }}
           >
             修改
           </Button>
-          <Popconfirm title={`恢复 ${r.userName} ？`} disabled={+r.status === 10} onConfirm={() => console.log(r.id)}>
-            <Button type="link" size="small" disabled={+r.status === 10}>
+          <Popconfirm
+            title={`恢复 ${r.name} ？`}
+            disabled={+r.status === 10 || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, 10)}
+          >
+            <Button type="link" size="small" disabled={+r.status === 10 || editLoading}>
               恢复
             </Button>
           </Popconfirm>
-          <Popconfirm title={`禁用 ${r.userName} ？`} disabled={+r.status === 20} onConfirm={() => console.log(r.id)}>
-            <Button type="text" size="small" danger disabled={+r.status === 20}>
+          <Popconfirm
+            title={`禁用 ${r.name} ？`}
+            disabled={+r.status === 20 || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, 20)}
+          >
+            <Button type="text" size="small" danger disabled={+r.status === 20 || editLoading}>
               禁用
             </Button>
           </Popconfirm>
@@ -151,6 +208,7 @@ const MiUser = () => {
         rowKey="id"
         size="small"
         columns={columns}
+        loading={tableLoading}
         pagination={pagination}
         dataSource={dataSource}
         onChange={onTableChange}
@@ -164,37 +222,35 @@ const MiUser = () => {
         destroyOnClose
         keyboard={false}
         maskClosable={false}
-        title={modifyUser?.id ? '修改用户信息' : '添加用户信息'}
+        title={curModify ? '修改用户信息' : '添加用户信息'}
         visible={modalVisible}
+        closable={!editLoading}
+        okButtonProps={{ loading: editLoading }}
+        cancelButtonProps={{ disabled: editLoading }}
+        onCancel={() => setState((state) => ({ ...state, modalVisible: null, curModify: null }))}
         afterClose={form.resetFields}
-        onCancel={() => setState((state) => ({ ...state, modalVisible: null, modifyUser: null }))}
-        onOk={() =>
-          form
-            .validateFields()
-            .then(console.log)
-            .catch(() => {})
-        }
+        onOk={handleEditOk}
       >
         <Form form={form} autoComplete="off" labelCol={{ span: 5 }} wrapperCol={{ span: 16 }}>
-          <Form.Item label="用户名" name="userName" rules={[{ required: true }]}>
-            <Input disabled={!!modifyUser?.id} />
+          <Form.Item label="用户名" name="name" rules={[{ required: true }]}>
+            <Input disabled={!!curModify} />
           </Form.Item>
-          {modifyUser?.id && (
-            <Form.Item label="旧密码" name="old">
+          {curModify && (
+            <Form.Item label="旧密码" name="oldPassword">
               <Input.Password />
             </Form.Item>
           )}
-          <Form.Item label="密码" name="psw" rules={[{ required: !modifyUser, whitespace: true }, { min: 8 }]}>
+          <Form.Item label="密码" name="password" rules={[{ required: !curModify, whitespace: true }, { min: 8 }]}>
             <Input.Password />
           </Form.Item>
           <Form.Item
             label="确认密码"
-            name="newPsw"
+            name="confirmPassword"
             rules={[
-              { required: !modifyUser, whitespace: true },
+              { required: !curModify, whitespace: true },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || getFieldValue('psw') === value) return Promise.resolve()
+                  if (!value || getFieldValue('password') === value) return Promise.resolve()
                   return Promise.reject(new Error('两次输入的密码不匹配'))
                 },
               }),
@@ -206,12 +262,6 @@ const MiUser = () => {
             <Input.TextArea />
           </Form.Item>
         </Form>
-
-        {modifyUser?.id && (
-          <p>
-            修改用户信息时，如果不修改密码，密码相关输入框就留空白。修改时后端逻辑这样判断：如果密码相关输入框为空，直接更新备注字段；如果密码相关输入框不为空，需通过密码相关的校验才可修改
-          </p>
-        )}
       </Modal>
     </section>
   )

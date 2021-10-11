@@ -9,10 +9,10 @@ import en from './lang/en.json'
 import { chainEnum } from '@/consts'
 import { descPH, presalePH, airdropPH, presaleTemplate, airdropTemplate, additionalLinkPH } from './const'
 
-import Footer from '@/components/footer'
-
+// 是否中文
 const ifZh = (lang) => lang === 'zh'
 
+// 日期格式校验 2022-22-22 22:22
 const dateReg =
   /^(((20\d{2})-(0(1|[3-9])|1[012])-(0[1-9]|[12]\d|30))|((20\d{2})-(0[13578]|1[02])-31)|((20\d{2})-02-(0[1-9]|1\d|2[0-8]))|(((20([13579][26]|[2468][048]|0[48]))|(2000))-02-29))\s([0-1][0-9]|2[0-3]):([0-5][0-9])$/
 
@@ -81,15 +81,9 @@ function CoinForm() {
             <Form.Item
               label={tt.logo}
               name="logo"
-              getValueFromEvent={(e) => {
-                console.log('Upload event:', e)
-                if (Array.isArray(e)) {
-                  return e
-                }
-                return e && e.fileList
-              }}
+              getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
               valuePropName="fileList"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: '请上传代币 logo' }]}
             >
               <Upload name="logo" action="/upload.do" listType="picture">
                 <Button

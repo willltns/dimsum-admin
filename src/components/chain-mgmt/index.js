@@ -50,11 +50,11 @@ function ChainMGMT() {
       {/* 编辑弹窗 */}
       <Modal
         footer={null}
+        destroyOnClose
         keyboard={false}
         visible={!!modifyChain}
         maskClosable={false}
         title={modifyChain?.id ? '修改主网名' : '添加主网'}
-        destroyOnClose
         onCancel={() => setState((state) => ({ ...state, modifyChain: null }))}
       >
         <Form
@@ -64,26 +64,21 @@ function ChainMGMT() {
             console.log(value)
             console.log(modifyChain?.id)
           }}
+          autoComplete="off"
           initialValues={modifyChain?.id ? { ...modifyChain } : undefined}
         >
           <Form.Item label="主网名" name="name" rules={[{ required: true, whitespace: true }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item label="符号" name="Symbol" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item label="符号" name="symbol" rules={[{ required: true, whitespace: true }]}>
             <Input />
           </Form.Item>
 
           <Form.Item
             label="Logo"
             name="logo"
-            getValueFromEvent={(e) => {
-              console.log('Upload event:', e)
-              if (Array.isArray(e)) {
-                return e
-              }
-              return e && e.fileList
-            }}
+            getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
             valuePropName="fileList"
           >
             <Upload name="logo" action="/upload.do" listType="picture">

@@ -1,41 +1,56 @@
 // import ss from './index.module.less'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import moment from 'moment'
 import { Button, DatePicker, Form, Input, Modal, Select, Table, Upload, Space, Popconfirm } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
 
 import { adStatusList, adStatusMap, advertTypeList, advertTypeMap } from '@/consts'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
+import { fetchBannerList, addBanner, updateBanner, updateBannerStatus } from '@/pages/advert/xhr'
 
 const data = [
   {
     id: 1,
-    picUrl: 'https://',
-    linkUrl: 'https://',
-    type: 10,
-    adStatus: 10,
+    coinName: 'baby cc',
+    type: 20,
+    status: 10,
+    bannerUrl: 'http://...',
+    linkUrl: 'http://...',
+    price: 0.1,
+    shelfTime: '2022-10-11 11:00:00',
+    offShelfTime: '2022-10-12 11:00:00',
+    contactEmail: '11@cc.cc',
+    contactTg: '@ssss',
+    remark: '说说说。。。。。。',
   },
   {
     id: 2,
-    picUrl: 'https://',
-    linkUrl: 'https://',
-    type: 20,
-    adStatus: 20,
-  },
-  {
-    id: 13,
-    picUrl: 'https://',
-    linkUrl: 'https://',
-    type: 30,
-    adStatus: 30,
-  },
-  {
-    id: 4,
-    picUrl: 'https://',
-    linkUrl: 'https://',
+    coinName: 'baby aa',
     type: 10,
-    adStatus: 30,
+    status: 20,
+    bannerUrl: 'http://...',
+    linkUrl: 'http://...',
+    price: 0.1,
+    shelfTime: '',
+    offShelfTime: '',
+    contactEmail: '11@cc.cc',
+    contactTg: '@ssss',
+    remark: '说说说。。。。。。',
+  },
+  {
+    id: 3,
+    coinName: 'baby ff',
+    type: 30,
+    status: 30,
+    bannerUrl: 'http://...',
+    linkUrl: 'http://...',
+    price: 0.1,
+    shelfTime: '',
+    offShelfTime: '',
+    contactEmail: '11@cc.cc',
+    contactTg: '@ssss',
+    remark: '说说说。。。。。。',
   },
 ]
 
@@ -46,15 +61,17 @@ const BannerMGMT = () => {
     pageSize: 10,
     dataSource: data,
     filteredType: null,
-    filteredAdStatus: null,
+    filteredStatus: null,
     sortedField: null,
     sortedOrder: null,
     coinName: '',
     contactEmail: '',
-    contactTelegram: '',
+    contactTg: '',
     remark: '',
     modalVisible: false,
-    modifyId: null,
+    curModify: null,
+    tableLoading: false,
+    editLoading: false,
   })
   const {
     total,
@@ -62,33 +79,95 @@ const BannerMGMT = () => {
     pageSize,
     dataSource,
     filteredType,
-    filteredAdStatus,
+    filteredStatus,
     sortedField,
     sortedOrder,
     coinName,
     contactEmail,
-    contactTelegram,
+    contactTg,
     remark,
     modalVisible,
-    modifyId,
+    curModify,
+    tableLoading,
+    editLoading,
   } = state
 
-  useEffect(() => {
-    console.log('request', state)
+  const handleBannerList = useCallback(() => {
+    setState((state) => ({ ...state, tableLoading: true }))
+    const params = {
+      pageNo: current,
+      pageSize,
+      type: filteredType,
+      status: filteredStatus,
+      sortedField,
+      sortedOrder,
+      coinName,
+      contactEmail,
+      contactTg,
+      remark,
+    }
+
+    fetchBannerList(params)
+      .then((res) => {
+        console.log(res)
+        setState((state) => ({ ...state, tableLoading: false }))
+      })
+      .catch(() => setState((state) => ({ ...state, tableLoading: false })))
   }, [
     current,
     pageSize,
     filteredType,
-    filteredAdStatus,
+    filteredStatus,
     sortedField,
     sortedOrder,
     coinName,
     contactEmail,
-    contactTelegram,
+    contactTg,
     remark,
   ])
 
+  useEffect(() => {
+    handleBannerList()
+  }, [handleBannerList])
+
   const [form] = Form.useForm()
+
+  const handleEditOk = async () => {
+    setState((state) => ({ ...state, editLoading: true }))
+    try {
+      const values = await form.validateFields()
+      const { timeRange, bannerUrl, ...params } = values
+
+      params.shelfTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')
+      params.offShelfTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
+
+      const { response } = bannerUrl[0]
+      params.bannerUrl = response
+
+      if (curModify) {
+        params.id = curModify.id
+        await updateBanner(params)
+      } else {
+        await addBanner(params)
+      }
+      setState((state) => ({ ...state, editLoading: false }))
+      handleBannerList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
+
+  const handleUpdateStatus = async (id, status) => {
+    setState((state) => ({ ...state, editLoading: true }))
+
+    try {
+      await updateBannerStatus({ id, status })
+      setState((state) => ({ ...state, editLoading: false }))
+      handleBannerList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
 
   const pagination = {
     total,
@@ -102,29 +181,24 @@ const BannerMGMT = () => {
 
   const onTableChange = (pagination, filters, sorter) => {
     const { current, pageSize } = pagination
-    const { type, adStatus } = filters
+    const { type, status } = filters
     const { field, order } = sorter
 
     setState((state) => ({
       ...state,
-      current,
+      current: state.pageSize === pageSize ? current : 1,
       pageSize,
       filteredType: type?.[0],
-      filteredAdStatus: adStatus?.[0],
-      sortedField: field,
+      filteredStatus: status?.[0],
       sortedOrder: order,
+      sortedField: order ? field : null,
     }))
   }
 
-  const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value }))
+  const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value, current: 1 }))
 
   const columns = [
-    {
-      title: 'id',
-      dataIndex: 'id',
-      fixed: 'left',
-      width: 80,
-    },
+    //{ title: 'id', dataIndex: 'id', fixed: 'left', width: 80 },
     {
       title: '代币名称',
       dataIndex: 'coinName',
@@ -132,16 +206,8 @@ const BannerMGMT = () => {
       width: 150,
       ...getColumnSearchProps('代币名称', 'coinName', handleInputSearch, coinName),
     },
-    {
-      title: '横幅链接',
-      dataIndex: 'picUrl',
-      width: 200,
-    },
-    {
-      title: '跳转链接',
-      dataIndex: 'linkUrl',
-      width: 200,
-    },
+    { title: '横幅链接', dataIndex: 'bannerUrl', width: 200 },
+    { title: '跳转链接', dataIndex: 'linkUrl', width: 200 },
     {
       title: '横幅类型',
       dataIndex: 'type',
@@ -153,33 +219,29 @@ const BannerMGMT = () => {
     },
     {
       title: '状态',
-      dataIndex: 'adStatus',
+      dataIndex: 'status',
       width: 88,
-      filteredValue: filteredAdStatus ? [filteredAdStatus] : null,
+      filteredValue: filteredStatus ? [filteredStatus] : null,
       filterMultiple: false,
       filters: adStatusList,
       render: (t) => adStatusMap[t]?.text,
     },
     {
       title: '上架时间',
-      dataIndex: 'putOnTime',
+      dataIndex: 'shelfTime',
       width: 170,
       sorter: true,
-      sortOrder: sortedField === 'putOnTime' ? sortedOrder : false,
+      sortOrder: sortedField === 'shelfTime' ? sortedOrder : false,
     },
     {
       title: '下架时间',
-      dataIndex: 'putOffTime',
+      dataIndex: 'offShelfTime',
       width: 170,
       sorter: true,
-      sortOrder: sortedField === 'putOffTime' ? sortedOrder : false,
+      sortOrder: sortedField === 'offShelfTime' ? sortedOrder : false,
     },
 
-    {
-      title: '价格',
-      dataIndex: 'price',
-      width: 120,
-    },
+    { title: '价格', dataIndex: 'price', width: 120 },
     {
       title: '联系邮箱',
       dataIndex: 'contactEmail',
@@ -188,9 +250,9 @@ const BannerMGMT = () => {
     },
     {
       title: '联系电报',
-      dataIndex: 'contactTelegram',
+      dataIndex: 'contactTg',
       width: 200,
-      ...getColumnSearchProps('联系电报', 'contactTelegram', handleInputSearch, contactTelegram),
+      ...getColumnSearchProps('联系电报', 'contactTg', handleInputSearch, contactTg),
     },
     {
       title: '备注',
@@ -210,17 +272,31 @@ const BannerMGMT = () => {
           <Button
             type="link"
             size="small"
-            onClick={() => setState((state) => ({ ...state, modalVisible: true, modifyId: r.id }))}
+            onClick={() => {
+              setState((state) => ({ ...state, modalVisible: true, curModify: r }))
+              const fields = { ...r }
+              fields.timeRange = [moment(r.shelfTime), moment(r.offShelfTime)]
+              fields.bannerUrl = [r.bannerUrl]
+              setTimeout(() => form.setFieldsValue({ ...fields }))
+            }}
           >
             修改
           </Button>
-          <Popconfirm title={`上架 ${r.coinName} ？`} disabled={+r.adStatus === 20} onConfirm={() => console.log(r.id)}>
-            <Button type="link" size="small" disabled={+r.adStatus === 20}>
+          <Popconfirm
+            title={`上架 ${r.coinName} ？`}
+            disabled={+r.status === 20 || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, 20)}
+          >
+            <Button type="link" size="small" disabled={+r.status === 20 || editLoading}>
               上架
             </Button>
           </Popconfirm>
-          <Popconfirm title={`下架 ${r.coinName} ？`} disabled={+r.adStatus === 30} onConfirm={() => console.log(r.id)}>
-            <Button type="text" size="small" disabled={+r.adStatus === 30}>
+          <Popconfirm
+            title={`下架 ${r.coinName} ？`}
+            disabled={+r.status === 30 || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, 30)}
+          >
+            <Button type="text" size="small" disabled={+r.status === 30 || editLoading}>
               下架
             </Button>
           </Popconfirm>
@@ -242,6 +318,7 @@ const BannerMGMT = () => {
         rowKey="id"
         size="small"
         columns={columns}
+        loading={tableLoading}
         pagination={pagination}
         dataSource={dataSource}
         onChange={onTableChange}
@@ -254,22 +331,20 @@ const BannerMGMT = () => {
         width={600}
         keyboard={false}
         maskClosable={false}
-        title={modifyId ? '修改广告' : '添加广告'}
+        title={curModify?.id ? '修改广告' : '添加广告'}
         visible={modalVisible}
-        onCancel={() => setState((state) => ({ ...state, modalVisible: false, modifyId: null }))}
+        closable={!editLoading}
+        okButtonProps={{ loading: editLoading }}
+        cancelButtonProps={{ disabled: editLoading }}
+        onCancel={() => setState((state) => ({ ...state, modalVisible: false, curModify: null }))}
         afterClose={form.resetFields}
-        onOk={() => {
-          form
-            .validateFields()
-            .then((values) => console.log(values))
-            .catch(() => {})
-        }}
+        onOk={handleEditOk}
       >
         <Form form={form} labelCol={{ span: 5 }} wrapperCol={{ span: 17 }}>
           <Form.Item label="名称" name="coinName" rules={[{ required: true }]}>
             <Input placeholder="输入代币名称（通常）" />
           </Form.Item>
-          <Form.Item label="类型" name="类型" rules={[{ required: true }]}>
+          <Form.Item label="类型" name="type" rules={[{ required: true }]}>
             <Select placeholder="选择广告类型">
               {advertTypeList.map((item) => (
                 <Select.Option value={item.value} key={item.value}>
@@ -279,19 +354,13 @@ const BannerMGMT = () => {
             </Select>
           </Form.Item>
           <Form.Item
-            label="图片"
-            name="logo"
-            getValueFromEvent={(e) => {
-              console.log('Upload event:', e)
-              if (Array.isArray(e)) {
-                return e
-              }
-              return e && e.fileList
-            }}
+            label="横幅"
+            name="bannerUrl"
             valuePropName="fileList"
-            rules={[{ required: true }]}
+            getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
+            rules={[{ required: true, message: '请上传横幅图片' }]}
           >
-            <Upload name="logo" action="/upload.do" listType="picture">
+            <Upload name="banner" maxCount={1} action="/upload.do" listType="picture">
               <Button icon={<UploadOutlined />}>点击上传</Button>
             </Upload>
           </Form.Item>
@@ -314,7 +383,7 @@ const BannerMGMT = () => {
           <Form.Item label="邮箱" name="contactEmail">
             <Input placeholder="联系邮箱" />
           </Form.Item>
-          <Form.Item label="电报" name="contactTelegram">
+          <Form.Item label="电报" name="contactTg">
             <Input placeholder="联系电报" />
           </Form.Item>
           <Form.Item label="备注" name="remark">

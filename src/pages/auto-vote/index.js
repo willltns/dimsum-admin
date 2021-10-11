@@ -1,12 +1,13 @@
 // import ss from './index.module.less'
 
-import React from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { Button, Modal, Space, Table, Form, DatePicker, Col, InputNumber, Popconfirm, Input } from 'antd'
 
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import moment from 'moment'
 import XhrCoinSelect from '@/components/xhr-coin-select'
 import { autoVoteStatusList, autoVoteStatusMap } from './consts'
+import { addAutoVote, fetchAutoVoteList, updateAutoVoteStatus, deleteAutoVote } from '@/pages/auto-vote/xhr'
 
 const data = [
   {
@@ -15,8 +16,8 @@ const data = [
     coinName: 'FLOKI',
     coinSymbol: 'FLOKI',
     status: 10,
-    autoVotes: 300,
-    autoVotedVotes: 11,
+    votes: 300,
+    votedVotes: 11,
     coinUpvotes: 33333,
     coinUpvotesToday: 2222,
     startTime: '2020-12-12 12:00:00',
@@ -28,11 +29,11 @@ const data = [
     coinId: 115,
     coinName: 'FLOKI',
     coinSymbol: 'FLOKI',
-    status: 20,
-    autoVotes: 300,
-    autoVotedVotes: 11,
     coinUpvotes: 33333,
     coinUpvotesToday: 2222,
+    status: 20,
+    votes: 300,
+    votedVotes: 11,
     startTime: '2020-12-12 12:00:00',
     endTime: '2020-12-15 12:00:00',
     remark: '范德萨发个',
@@ -43,8 +44,8 @@ const data = [
     coinName: 'FLOKI',
     coinSymbol: 'FLOKI',
     status: 30,
-    autoVotes: 300,
-    autoVotedVotes: 11,
+    votes: 300,
+    votedVotes: 11,
     coinUpvotes: 33333,
     coinUpvotesToday: 2222,
     startTime: '2020-12-12 12:00:00',
@@ -57,8 +58,8 @@ const data = [
     coinName: 'FLOKI',
     coinSymbol: 'FLOKI',
     status: 40,
-    autoVotes: 300,
-    autoVotedVotes: 11,
+    votes: 300,
+    votedVotes: 11,
     coinUpvotes: 33333,
     coinUpvotesToday: 2222,
     startTime: '2020-12-12 12:00:00',
@@ -71,8 +72,8 @@ const data = [
     coinName: 'FLOKI',
     coinSymbol: 'FLOKI',
     status: 50,
-    autoVotes: 300,
-    autoVotedVotes: 222,
+    votes: 300,
+    votedVotes: 222,
     coinUpvotes: 33333,
     coinUpvotesToday: 2222,
     startTime: '2020-12-12 12:00:00',
@@ -95,6 +96,8 @@ const AutoVote = () => {
     coinSymbol: '',
     remark: '',
     modalVisible: false,
+    tableLoading: false,
+    editLoading: false,
     curCoinVoteStat: {},
   })
   const {
@@ -110,10 +113,68 @@ const AutoVote = () => {
     coinSymbol,
     remark,
     modalVisible,
+    tableLoading,
+    editLoading,
     curCoinVoteStat,
   } = state
 
+  const handleAutoVoteList = useCallback(() => {
+    setState((state) => ({ ...state, tableLoading: true }))
+    const params = {
+      pageNo: current,
+      pageSize,
+      status: filteredStatus,
+      sortedField,
+      sortedOrder,
+      coinId,
+      coinName,
+      coinSymbol,
+      remark,
+    }
+
+    fetchAutoVoteList(params)
+      .then((res) => {
+        console.log(res)
+        setState((state) => ({ ...state, tableLoading: false }))
+      })
+      .catch(() => setState((state) => ({ ...state, tableLoading: false })))
+  }, [current, pageSize, filteredStatus, sortedField, sortedOrder, coinId, coinName, coinSymbol, remark])
+
+  useEffect(() => {
+    handleAutoVoteList()
+  }, [handleAutoVoteList])
+
   const [form] = Form.useForm()
+
+  const handleAddOk = async () => {
+    setState((state) => ({ ...state, editLoading: true }))
+    try {
+      const values = await form.validateFields()
+      const { timeRange, ...params } = values
+
+      params.startTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')
+      params.endTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
+
+      await addAutoVote(params)
+      setState((state) => ({ ...state, editLoading: false }))
+      handleAutoVoteList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
+
+  const handleUpdateStatus = async (id, status) => {
+    setState((state) => ({ ...state, editLoading: true }))
+
+    try {
+      // status 未传时，调用删除接口
+      status ? await updateAutoVoteStatus({ id, status }) : await deleteAutoVote({ id })
+      setState((state) => ({ ...state, editLoading: false }))
+      handleAutoVoteList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
 
   const pagination = {
     total,
@@ -135,12 +196,12 @@ const AutoVote = () => {
       current,
       pageSize,
       filteredStatus: status?.[0],
-      sortedField: field,
       sortedOrder: order,
+      sortedField: order ? field : null,
     }))
   }
 
-  const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value }))
+  const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value, current: 1 }))
 
   const columns = [
     {
@@ -186,26 +247,10 @@ const AutoVote = () => {
       filters: autoVoteStatusList,
       render: (t) => autoVoteStatusMap[t]?.text,
     },
-    {
-      title: '添加票数',
-      dataIndex: 'autoVotes',
-      width: 120,
-    },
-    {
-      title: '已添加票数',
-      dataIndex: 'autoVotedVotes',
-      width: 120,
-    },
-    {
-      title: '总投票数',
-      dataIndex: 'coinUpvotes',
-      width: 120,
-    },
-    {
-      title: '今日投票数',
-      dataIndex: 'coinUpvotesToday',
-      width: 120,
-    },
+    { title: '添加票数', dataIndex: 'votes', width: 120 },
+    { title: '已添加票数', dataIndex: 'votedVotes', width: 120 },
+    { title: '总投票数', dataIndex: 'coinUpvotes', width: 120 },
+    { title: '今日投票数', dataIndex: 'coinUpvotesToday', width: 120 },
     {
       title: '备注',
       width: 200,
@@ -222,28 +267,28 @@ const AutoVote = () => {
         <Space>
           <Popconfirm
             title={`激活 $${r.coinSymbol} ？`}
-            disabled={+r.status !== 10}
-            onConfirm={() => console.log(r.id)}
+            disabled={+r.status !== 10 || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, 20)}
           >
-            <Button type="link" size="small" disabled={+r.status !== 10}>
+            <Button type="link" size="small" disabled={+r.status !== 10 || editLoading}>
               激活
             </Button>
           </Popconfirm>
           <Popconfirm
             title={`取消 $${r.coinSymbol} ？`}
-            disabled={+r.status === 50 || +r.status === 40}
-            onConfirm={() => console.log(r.id)}
+            disabled={+r.status === 50 || +r.status === 40 || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, 50)}
           >
-            <Button type="text" size="small" disabled={+r.status === 50 || +r.status === 40}>
+            <Button type="text" size="small" disabled={+r.status === 50 || +r.status === 40 || editLoading}>
               取消
             </Button>
           </Popconfirm>
           <Popconfirm
             title={`删除 $${r.coinSymbol} ？`}
-            disabled={+r.status !== 50 && +r.status !== 40}
-            onConfirm={() => console.log(r.id)}
+            disabled={(+r.status !== 50 && +r.status !== 40) || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id)}
           >
-            <Button type="text" size="small" danger disabled={+r.status !== 50 && +r.status !== 40}>
+            <Button type="text" size="small" danger disabled={(+r.status !== 50 && +r.status !== 40) || editLoading}>
               删除
             </Button>
           </Popconfirm>
@@ -266,6 +311,7 @@ const AutoVote = () => {
         rowKey="id"
         size="small"
         columns={columns}
+        loading={tableLoading}
         pagination={pagination}
         dataSource={dataSource}
         onChange={onTableChange}
@@ -279,20 +325,18 @@ const AutoVote = () => {
         destroyOnClose
         keyboard={false}
         maskClosable={false}
-        title="添加自动投票"
         okText="添加"
+        title="添加自动投票"
         visible={modalVisible}
+        closable={!editLoading}
+        okButtonProps={{ loading: editLoading }}
+        cancelButtonProps={{ disabled: editLoading }}
         onCancel={() => setState((state) => ({ ...state, modalVisible: false }))}
         afterClose={() => {
           form.resetFields()
           setState((state) => ({ ...state, autoVoteEdit: null }))
         }}
-        onOk={() => {
-          form
-            .validateFields()
-            .then(console.log)
-            .catch(() => {})
-        }}
+        onOk={handleAddOk}
       >
         <Form
           form={form}
@@ -322,7 +366,7 @@ const AutoVote = () => {
               </span>
             </Col>
           </Form.Item>
-          <Form.Item label="添加投票数" name="autoVotes" rules={[{ required: true }]}>
+          <Form.Item label="添加投票数" name="votes" rules={[{ required: true }]}>
             <InputNumber min={1} style={{ width: '100%' }} placeholder="输入正整数" />
           </Form.Item>
           <Form.Item label="投票时间段" name="timeRange" rules={[{ required: true }]}>

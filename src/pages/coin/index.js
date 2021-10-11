@@ -108,12 +108,12 @@ const CoinMGMT = () => {
       pageSize,
       filteredChainType: coinChain?.[0],
       filteredAuditStatus: auditStatus?.[0],
-      sortedField: field,
       sortedOrder: order,
+      sortedField: order ? field : null,
     }))
   }
 
-  const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value }))
+  const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value, current: 1 }))
 
   const columns = [
     {
