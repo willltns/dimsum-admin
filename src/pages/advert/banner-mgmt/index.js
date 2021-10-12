@@ -360,7 +360,7 @@ const BannerMGMT = () => {
             getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
             rules={[{ required: true, message: '请上传横幅图片' }]}
           >
-            <Upload name="banner" maxCount={1} action="/upload.do" listType="picture">
+            <Upload name="banner" action="/upload.do" listType="picture" maxCount={1}>
               <Button icon={<UploadOutlined />}>点击上传</Button>
             </Upload>
           </Form.Item>

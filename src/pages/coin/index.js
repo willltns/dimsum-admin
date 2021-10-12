@@ -1,51 +1,51 @@
 // import ss from './index.module.less'
 
-import React from 'react'
+import React, { useEffect, useCallback } from 'react'
 import { Button, Modal, Space, Table, Popconfirm, Row } from 'antd'
 
 import CoinForm from '@/components/coin-form'
 
-import { chainTypeList, chainTypeMap, coinAuditStatusList, coinAuditStatusMap } from '@/consts'
+import { chainTypeList, chainTypeMap, coinStatusList, coinStatusMap } from '@/consts'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import ChainMGMT from '@/components/chain-mgmt'
+import { addCoin, updateCoin, fetchCoinList, updateCoinStatus, deleteCoin } from '@/pages/coin/xhr'
 
 const data = [
   {
-    coinId: 1,
+    id: 1,
     coinName: 'Baby Shark Doge',
     coinSymbol: 'BSD',
     coinChain: 20,
-    picUrl: 'https://',
-    linkUrl: 'https://',
-    type: 10,
-
-    auditStatus: 20,
+    coinStatus: 10,
     coinUpvotes: 1112,
     coinUpvotesToday: 656,
   },
   {
-    coinId: 2,
-    coinName: 'Baby Shark Doge',
-    coinSymbol: 'BSD',
-    coinChain: 20,
-    picUrl: 'https://',
-    linkUrl: 'https://',
-    type: 10,
-    auditStatus: 10,
-    coinUpvotes: 1112,
-    coinUpvotesToday: 656,
-  },
-  {
-    coinId: 3,
+    id: 2,
     coinName: 'Baby Shark Doge',
     coinSymbol: 'BSD',
     coinChain: 10,
-    picUrl: 'https://',
-    linkUrl: 'https://',
-    type: 10,
-    auditStatus: 30,
+    coinStatus: 20,
     coinUpvotes: 1112,
     coinUpvotesToday: 656,
+  },
+  {
+    id: 3,
+    coinName: 'Baby Shark Doge',
+    coinSymbol: 'BSD',
+    coinChain: 30,
+    coinStatus: 30,
+    coinUpvotes: 22222,
+    coinUpvotesToday: 33,
+  },
+  {
+    id: 4,
+    coinName: 'Baby Shark Doge',
+    coinSymbol: 'BSD',
+    coinChain: 10,
+    coinStatus: 30,
+    coinUpvotes: 1111,
+    coinUpvotesToday: 666,
   },
 ]
 
@@ -57,16 +57,19 @@ const CoinMGMT = () => {
     dataSource: data,
     filteredChainType: null,
     filteredAuditStatus: null,
+    filteredPromoted: null,
     sortedField: null,
     sortedOrder: null,
-    coinId: '',
+    id: '',
     coinName: '',
     coinSymbol: '',
     contactEmail: '',
-    contactTelegram: '',
+    contactTg: '',
     remark: '',
     modalVisible: false,
-    modifyId: null,
+    curModify: null,
+    tableLoading: false,
+    editLoading: false,
   })
   const {
     total,
@@ -74,18 +77,89 @@ const CoinMGMT = () => {
     pageSize,
     dataSource,
     filteredChainType,
-    filteredAuditStatus,
+    filteredCoinStatus,
+    filteredPromoted,
     sortedField,
     sortedOrder,
-    coinId,
+    id,
     coinName,
     coinSymbol,
     contactEmail,
-    contactTelegram,
+    contactTg,
     remark,
     modalVisible,
-    modifyId,
+    curModify,
+    tableLoading,
+    editLoading,
   } = state
+
+  const handleCoinList = useCallback(() => {
+    setState((state) => ({ ...state, tableLoading: true }))
+    const params = {
+      pageNo: current,
+      pageSize,
+      coinStatus: filteredCoinStatus,
+      coinChain: filteredChainType,
+      promoted: filteredPromoted,
+      sortedField,
+      sortedOrder,
+      id,
+      coinName,
+      coinSymbol,
+      contactEmail,
+      contactTg,
+      remark,
+    }
+
+    fetchCoinList(params)
+      .then((res) => {
+        console.log(res)
+        setState((state) => ({ ...state, tableLoading: false }))
+      })
+      .catch(() => setState((state) => ({ ...state, tableLoading: false })))
+  }, [
+    current,
+    pageSize,
+    filteredCoinStatus,
+    filteredChainType,
+    filteredPromoted,
+    sortedField,
+    sortedOrder,
+    id,
+    coinName,
+    coinSymbol,
+    contactEmail,
+    contactTg,
+    remark,
+  ])
+
+  useEffect(() => {
+    handleCoinList()
+  }, [handleCoinList])
+
+  const handleEditOk = async (params, id) => {
+    setState((state) => ({ ...state, editLoading: true }))
+    try {
+      id ? await updateCoin({ ...params, id }) : await addCoin(params)
+      setState((state) => ({ ...state, editLoading: false }))
+      handleCoinList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
+
+  const handleUpdateStatus = async (id, status) => {
+    setState((state) => ({ ...state, editLoading: true }))
+
+    try {
+      // status 未传时，调用删除接口
+      status ? await updateCoinStatus({ id, status }) : await deleteCoin({ id })
+      setState((state) => ({ ...state, editLoading: false }))
+      handleCoinList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
 
   const pagination = {
     total,
@@ -99,15 +173,18 @@ const CoinMGMT = () => {
 
   const onTableChange = (pagination, filters, sorter) => {
     const { current, pageSize } = pagination
-    const { coinChain, auditStatus } = filters
+    const { coinChain, coinStatus } = filters
     const { field, order } = sorter
+
+    // TODO 排序时重置页码，新建重置？
+    // const pageNo = field === sortedField && order === sortedOrder ? current : 1
 
     setState((state) => ({
       ...state,
       current,
       pageSize,
       filteredChainType: coinChain?.[0],
-      filteredAuditStatus: auditStatus?.[0],
+      filteredCoinStatus: coinStatus?.[0],
       sortedOrder: order,
       sortedField: order ? field : null,
     }))
@@ -118,10 +195,10 @@ const CoinMGMT = () => {
   const columns = [
     {
       title: '代币Id',
-      dataIndex: 'coinId',
+      dataIndex: 'id',
       fixed: 'left',
       width: 80,
-      ...getColumnSearchProps('代币 id', 'coinId', handleInputSearch, coinId),
+      ...getColumnSearchProps('代币 id', 'id', handleInputSearch, id),
     },
     {
       title: '代币名称',
@@ -148,15 +225,6 @@ const CoinMGMT = () => {
       render: (t) => chainTypeMap[t]?.text,
     },
     {
-      title: '状态',
-      dataIndex: 'auditStatus',
-      width: 88,
-      filteredValue: filteredAuditStatus ? [filteredAuditStatus] : null,
-      filterMultiple: false,
-      filters: coinAuditStatusList,
-      render: (t) => coinAuditStatusMap[t]?.text,
-    },
-    {
       title: '投票数',
       dataIndex: 'coinUpvotes',
       width: 100,
@@ -170,13 +238,31 @@ const CoinMGMT = () => {
       sorter: true,
       sortOrder: sortedField === 'coinUpvotesToday' ? sortedOrder : false,
     },
-
     {
-      title: '审核时间（状态变更）',
-      dataIndex: 'auditTime',
+      title: '推广',
+      dataIndex: 'promoted',
+      width: 66,
+      filteredValue: filteredPromoted ? [filteredPromoted] : null,
+      filterMultiple: false,
+      filters: [
+        { text: '是', value: 1 },
+        { text: '否', value: 0 },
+      ],
+      render: (t) => (+t === 1 ? '是' : '否'),
+    },
+    {
+      title: '上市时间',
+      dataIndex: 'shelfTime',
       width: 170,
       sorter: true,
-      sortOrder: sortedField === 'auditTime' ? sortedOrder : false,
+      sortOrder: sortedField === 'shelfTime' ? sortedOrder : false,
+    },
+    {
+      title: '下市时间',
+      dataIndex: 'offShelfTime',
+      width: 170,
+      sorter: true,
+      sortOrder: sortedField === 'offShelfTime' ? sortedOrder : false,
     },
     {
       title: '联系邮箱',
@@ -186,9 +272,9 @@ const CoinMGMT = () => {
     },
     {
       title: '联系电报',
-      dataIndex: 'contactTelegram',
+      dataIndex: 'contactTg',
       width: 200,
-      ...getColumnSearchProps('联系电报', 'contactTelegram', handleInputSearch, contactTelegram),
+      ...getColumnSearchProps('联系电报', 'contactTg', handleInputSearch, contactTg),
     },
     {
       title: '备注',
@@ -196,7 +282,16 @@ const CoinMGMT = () => {
       dataIndex: 'remark',
       ...getColumnSearchProps('备注', 'remark', handleInputSearch, remark),
     },
-
+    {
+      title: '状态',
+      dataIndex: 'coinStatus',
+      width: 66,
+      fixed: 'right',
+      filteredValue: filteredCoinStatus ? [filteredCoinStatus] : null,
+      filterMultiple: false,
+      filters: coinStatusList,
+      render: (t) => coinStatusMap[t]?.text,
+    },
     {
       title: '操作',
       align: 'center',
@@ -204,32 +299,35 @@ const CoinMGMT = () => {
       width: 160,
       fixed: 'right',
       render: (_, r) => (
-        <Space align="end">
+        <Space>
           <Button
             type="link"
             size="small"
-            onClick={() => setState((state) => ({ ...state, modalVisible: true, modifyId: r.id }))}
+            onClick={() => setState((state) => ({ ...state, modalVisible: true, curModify: r }))}
           >
             修改
           </Button>
 
           <Popconfirm
             title={`上市 $${r.coinSymbol} ？`}
-            disabled={+r.auditStatus === 10}
-            onConfirm={() => console.log(r.id)}
+            disabled={+r.coinStatus === 20}
+            onConfirm={() => handleUpdateStatus(r.id, 20)}
           >
-            <Button type="link" size="small" disabled={+r.auditStatus === 10}>
+            <Button type="link" size="small" disabled={+r.coinStatus === 20}>
               上市
             </Button>
           </Popconfirm>
 
           <Popconfirm
-            title={`下市 $${r.coinSymbol} ？`}
-            disabled={+r.auditStatus === 20}
-            onConfirm={() => console.log(r.id)}
+            title={`${+r.coinStatus === 10 ? '拒绝' : ''}${+r.coinStatus === 20 ? '下市' : ''}${
+              +r.coinStatus === 30 ? '删除' : ''
+            } $${r.coinSymbol} ？`}
+            onConfirm={() => handleUpdateStatus(r.id, +r.coinStatus === 20 ? 30 : undefined)}
           >
-            <Button type="text" size="small" disabled={+r.auditStatus === 20}>
-              下市
+            <Button type="text" danger size="small">
+              {+r.coinStatus === 10 ? '拒绝' : ''}
+              {+r.coinStatus === 20 ? '下市' : ''}
+              {+r.coinStatus === 30 ? '删除' : ''}
             </Button>
           </Popconfirm>
         </Space>
@@ -251,9 +349,10 @@ const CoinMGMT = () => {
       </Space>
       <Table
         bordered
-        rowKey="coinId"
+        rowKey="id"
         size="small"
         columns={columns}
+        loading={tableLoading}
         pagination={pagination}
         dataSource={dataSource}
         onChange={onTableChange}
@@ -268,12 +367,13 @@ const CoinMGMT = () => {
         destroyOnClose
         keyboard={false}
         maskClosable={false}
-        title={modifyId ? '修改代币' : '添加代币'}
         visible={modalVisible}
-        onCancel={() => setState((state) => ({ ...state, modalVisible: false, modifyId: null }))}
+        closable={!editLoading}
+        title={curModify ? '修改代币' : '添加代币'}
+        onCancel={() => setState((state) => ({ ...state, modalVisible: false, curModify: null }))}
         bodyStyle={{ height: '80vh', overflowY: 'auto' }}
       >
-        <CoinForm />
+        <CoinForm coinInfo={curModify} loading={editLoading} onOk={handleEditOk} />
       </Modal>
     </section>
   )

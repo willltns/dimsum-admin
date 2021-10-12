@@ -2,7 +2,7 @@
 import axios from 'axios'
 import { message } from 'antd'
 
-axios.defaults.baseURL = '/api-v1'
+// axios.defaults.baseURL = '/api-v1'
 
 axios.defaults.timeout = 60000
 

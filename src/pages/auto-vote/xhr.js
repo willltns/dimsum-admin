@@ -1,7 +1,7 @@
 import axios from '@/utils/axios'
 import { clearFalsyFields } from '@/utils/clearFalsyFields'
 
-// 投票推广 api
+// 自动投票 api
 
 export const addAutoVote = (params) => axios.post('/auto-vote/add', params)
 

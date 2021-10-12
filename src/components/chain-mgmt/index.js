@@ -1,13 +1,44 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button, Form, Input, Modal, Table, Upload } from 'antd'
-import { chainTypeList } from '@/consts'
 import { UploadOutlined } from '@ant-design/icons'
+
+import { chainTypeList } from '@/consts'
+import { addChain, editChain, fetchChainList } from './xhr'
 
 const data = chainTypeList.map((item, index) => ({ id: item.value, chainName: item.text, sort: index }))
 
 function ChainMGMT() {
-  const [state, setState] = useState({ modalVisible: false, modifyChain: null })
-  const { modalVisible, modifyChain } = state
+  const [state, setState] = useState({
+    modalVisible: false,
+    curModify: null,
+    dataSource: [],
+    tableLoading: false,
+    editLoading: false,
+  })
+  const { modalVisible, curModify, dataSource, tableLoading, editLoading } = state
+
+  const handleChainList = () => {
+    setState((state) => ({ ...state, tableLoading: true }))
+    fetchChainList()
+      .then((res) => setState((state) => ({ ...state, tableLoading: false, dataSource: res })))
+      .catch(() => setState((state) => ({ ...state, tableLoading: false, dataSource: data })))
+  }
+
+  useEffect(() => {
+    if (modalVisible) handleChainList()
+  }, [modalVisible])
+
+  const onFormFinish = async (values) => {
+    setState((state) => ({ ...state, editLoading: true }))
+
+    try {
+      curModify?.id ? await editChain({ ...values, id: curModify.id }) : await addChain(values)
+      setState((state) => ({ ...state, editLoading: false, curModify: null }))
+      handleChainList()
+    } catch (err) {
+      setState((state) => ({ ...state, editLoading: false }))
+    }
+  }
 
   const columns = [
     { title: 'id', dataIndex: 'id' },
@@ -18,7 +49,7 @@ function ChainMGMT() {
       dataIndex: 'operate',
       align: 'center',
       render: (_, r) => (
-        <Button type="link" size="small" onClick={() => setState((state) => ({ ...state, modifyChain: r }))}>
+        <Button type="link" size="small" onClick={() => setState((state) => ({ ...state, curModify: r }))}>
           修改
         </Button>
       ),
@@ -26,7 +57,7 @@ function ChainMGMT() {
   ]
   return (
     <>
-      <Button onClick={() => setState((state) => ({ ...state, modalVisible: true }))}>主网类型管理</Button>
+      <Button onClick={() => setState((state) => ({ ...state, modalVisible: true }))}>主网管理</Button>
 
       {/* 列表弹窗 */}
       <Modal
@@ -35,16 +66,23 @@ function ChainMGMT() {
         keyboard={false}
         visible={modalVisible}
         maskClosable={false}
-        title="主网类型管理"
+        title="主网管理"
         onCancel={() => setState((state) => ({ ...state, modalVisible: false }))}
       >
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
-          <Button type="primary" onClick={() => setState((state) => ({ ...state, modifyChain: {} }))}>
+          <Button type="primary" onClick={() => setState((state) => ({ ...state, curModify: {} }))}>
             添加主网
           </Button>
         </div>
 
-        <Table rowKey="id" bordered columns={columns} dataSource={data} pagination={false} />
+        <Table
+          rowKey="id"
+          bordered
+          columns={columns}
+          pagination={false}
+          loading={tableLoading}
+          dataSource={dataSource}
+        />
       </Modal>
 
       {/* 编辑弹窗 */}
@@ -52,22 +90,20 @@ function ChainMGMT() {
         footer={null}
         destroyOnClose
         keyboard={false}
-        visible={!!modifyChain}
         maskClosable={false}
-        title={modifyChain?.id ? '修改主网名' : '添加主网'}
-        onCancel={() => setState((state) => ({ ...state, modifyChain: null }))}
+        visible={!!curModify}
+        closable={!editLoading}
+        title={curModify?.id ? '修改主网名' : '添加主网'}
+        onCancel={() => setState((state) => ({ ...state, curModify: null }))}
       >
         <Form
+          autoComplete="off"
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
-          onFinish={(value) => {
-            console.log(value)
-            console.log(modifyChain?.id)
-          }}
-          autoComplete="off"
-          initialValues={modifyChain?.id ? { ...modifyChain } : undefined}
+          onFinish={onFormFinish}
+          initialValues={curModify?.id ? { ...curModify } : undefined}
         >
-          <Form.Item label="主网名" name="name" rules={[{ required: true, whitespace: true }]}>
+          <Form.Item label="主网名" name="chainName" rules={[{ required: true, whitespace: true }]}>
             <Input />
           </Form.Item>
 
@@ -81,7 +117,7 @@ function ChainMGMT() {
             getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
             valuePropName="fileList"
           >
-            <Upload name="logo" action="/upload.do" listType="picture">
+            <Upload name="logo" action="/upload.do" listType="picture" maxCount={1}>
               <Button icon={<UploadOutlined />}>点击上传</Button>
             </Upload>
           </Form.Item>
@@ -92,8 +128,8 @@ function ChainMGMT() {
 
           <Form.Item noStyle>
             <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <Button htmlType="submit" type="primary">
-                {modifyChain?.id ? '修改' : '添加'}
+              <Button htmlType="submit" type="primary" loading={editLoading}>
+                {curModify?.id ? '修改' : '添加'}
               </Button>
             </div>
           </Form.Item>
