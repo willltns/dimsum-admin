@@ -7,31 +7,12 @@ import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { miUserStatusList, miUserStatusMap } from './consts'
 import { addUser, fetchUserList, updateUser, updateUserStatus } from '@/pages/mi-user/xhr'
 
-const data = [
-  {
-    id: 1,
-    name: 'Will',
-    status: 10,
-    createTime: '2020-12-12 12:00:00',
-    modifyTime: '2020-12-12 12:00:00',
-    remark: '范德萨发个',
-  },
-  {
-    id: 2,
-    name: 'James',
-    status: 20,
-    createTime: '2020-12-12 12:00:00',
-    modifyTime: '2020-11-01 05:55:00',
-    remark: '反反复复',
-  },
-]
-
 const MiUser = () => {
   const [state, setState] = useState({
     total: 50,
     current: 1,
     pageSize: 10,
-    dataSource: data,
+    dataSource: [],
     filteredStatus: null,
     name: '',
     remark: '',
@@ -59,10 +40,9 @@ const MiUser = () => {
     const params = { pageNo: current, pageSize, name, remark, status: filteredStatus }
 
     fetchUserList(params)
-      .then((res) => {
-        console.log(res)
-        setState((state) => ({ ...state, tableLoading: false }))
-      })
+      .then((res) =>
+        setState((state) => ({ ...state, tableLoading: false, dataSource: res?.list || [], total: res?.total || 0 }))
+      )
       .catch(() => setState((state) => ({ ...state, tableLoading: false })))
   }, [current, pageSize, name, remark, filteredStatus])
 
@@ -78,13 +58,10 @@ const MiUser = () => {
       const values = await form.validateFields()
       const params = { ...values }
 
-      if (curModify) {
-        params.id = curModify.id
-        await updateUser(params)
-      } else {
-        await addUser(params)
-      }
-      setState((state) => ({ ...state, editLoading: false }))
+      curModify?.id && (params.id = curModify.id)
+      curModify?.id ? await updateUser(params) : await addUser(params)
+
+      setState((state) => ({ ...state, editLoading: false, modalVisible: false, curModify: null }))
       handleUserList()
     } catch (err) {
       setState((state) => ({ ...state, editLoading: false }))
@@ -232,7 +209,7 @@ const MiUser = () => {
         onOk={handleEditOk}
       >
         <Form form={form} autoComplete="off" labelCol={{ span: 5 }} wrapperCol={{ span: 16 }}>
-          <Form.Item label="用户名" name="name" rules={[{ required: true }]}>
+          <Form.Item label="用户名" name="name" rules={[{ required: true, whitespace: true }]}>
             <Input disabled={!!curModify} />
           </Form.Item>
           {curModify && (

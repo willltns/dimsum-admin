@@ -9,67 +9,12 @@ import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import XhrCoinSelect from '@/components/xhr-coin-select'
 import { fetchPromoCoinList, addPromoCoin, updatePromoCoin, updatePromoCoinStatus } from '@/pages/advert/xhr'
 
-const data = [
-  {
-    id: 1,
-    coinId: 113,
-    coinName: 'https://',
-    coinSymbol: 'https://',
-    status: 20,
-    shelfTime: '2020-12-20 22:00:00',
-    offShelfTime: '2020-12-22 22:00:00',
-    price: 10,
-    contactEmail: 'wwaaaa22ww@qq.com',
-    contactTg: '@mc_show_er',
-    remark: 10,
-  },
-  {
-    id: 4,
-    coinId: 113,
-    coinName: 'https://',
-    coinSymbol: 'https://',
-    status: 10,
-    shelfTime: '2020-12-20 22:00:00',
-    offShelfTime: '2020-12-22 22:00:00',
-    price: 10,
-    contactEmail: 'wwaaaa22ww@qq.com',
-    contactTg: '@mc_show_er',
-    remark: 10,
-  },
-  {
-    id: 3,
-    coinId: 113,
-    coinName: 'https://',
-    coinSymbol: 'https://',
-    status: 30,
-    shelfTime: '2020-12-20 22:00:00',
-    offShelfTime: '2020-12-22 22:00:00',
-    price: 10,
-    contactEmail: 'wwaaaa22ww@qq.com',
-    contactTg: '@mc_show_er',
-    remark: 10,
-  },
-  {
-    id: 2,
-    coinId: 113,
-    coinName: 'https://',
-    coinSymbol: 'https://',
-    status: 20,
-    shelfTime: '2020-12-20 22:00:00',
-    offShelfTime: '2020-12-22 22:00:00',
-    price: 10,
-    contactEmail: 'wwaaaa22ww@qq.com',
-    contactTg: '@mc_show_er',
-    remark: 'ddddvvv',
-  },
-]
-
 const PromoCoinMGMT = () => {
   const [state, setState] = useState({
     total: 50,
     current: 1,
     pageSize: 10,
-    dataSource: data,
+    dataSource: [],
     filteredStatus: null,
     sortedField: null,
     sortedOrder: null,
@@ -120,10 +65,9 @@ const PromoCoinMGMT = () => {
     }
 
     fetchPromoCoinList(params)
-      .then((res) => {
-        console.log(res)
-        setState((state) => ({ ...state, tableLoading: false }))
-      })
+      .then((res) =>
+        setState((state) => ({ ...state, tableLoading: false, dataSource: res?.list || [], total: res?.total || 0 }))
+      )
       .catch(() => setState((state) => ({ ...state, tableLoading: false })))
   }, [
     current,
@@ -154,13 +98,9 @@ const PromoCoinMGMT = () => {
       params.shelfTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')
       params.offShelfTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
 
-      if (curModify) {
-        params.id = curModify.id
-        await updatePromoCoin(params)
-      } else {
-        await addPromoCoin(params)
-      }
-      setState((state) => ({ ...state, editLoading: false }))
+      curModify?.id && (params.id = curModify.id)
+      curModify?.id ? await updatePromoCoin(params) : await addPromoCoin(params)
+      setState((state) => ({ ...state, editLoading: false, modalVisible: false, curModify: null }))
       handlePromoCoinList()
     } catch (err) {
       setState((state) => ({ ...state, editLoading: false }))
@@ -198,7 +138,7 @@ const PromoCoinMGMT = () => {
       ...state,
       current: state.pageSize === pageSize ? current : 1,
       pageSize,
-      filteredStatus: status?.[0],
+      filteredStatus: status?.join(','),
       sortedOrder: order,
       sortedField: order ? field : null,
     }))
@@ -232,8 +172,7 @@ const PromoCoinMGMT = () => {
       title: '状态',
       dataIndex: 'status',
       width: 88,
-      filteredValue: filteredStatus ? [filteredStatus] : null,
-      filterMultiple: false,
+      filteredValue: filteredStatus?.split(',') || null,
       filters: promoCoinStatusList,
       render: (t) => promoCoinStatusMap[t]?.text,
     },

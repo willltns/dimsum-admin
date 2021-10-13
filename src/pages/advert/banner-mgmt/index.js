@@ -9,57 +9,12 @@ import { adStatusList, adStatusMap, advertTypeList, advertTypeMap } from '@/cons
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { fetchBannerList, addBanner, updateBanner, updateBannerStatus } from '@/pages/advert/xhr'
 
-const data = [
-  {
-    id: 1,
-    coinName: 'baby cc',
-    type: 20,
-    status: 10,
-    bannerUrl: 'http://...',
-    linkUrl: 'http://...',
-    price: 0.1,
-    shelfTime: '2022-10-11 11:00:00',
-    offShelfTime: '2022-10-12 11:00:00',
-    contactEmail: '11@cc.cc',
-    contactTg: '@ssss',
-    remark: '说说说。。。。。。',
-  },
-  {
-    id: 2,
-    coinName: 'baby aa',
-    type: 10,
-    status: 20,
-    bannerUrl: 'http://...',
-    linkUrl: 'http://...',
-    price: 0.1,
-    shelfTime: '',
-    offShelfTime: '',
-    contactEmail: '11@cc.cc',
-    contactTg: '@ssss',
-    remark: '说说说。。。。。。',
-  },
-  {
-    id: 3,
-    coinName: 'baby ff',
-    type: 30,
-    status: 30,
-    bannerUrl: 'http://...',
-    linkUrl: 'http://...',
-    price: 0.1,
-    shelfTime: '',
-    offShelfTime: '',
-    contactEmail: '11@cc.cc',
-    contactTg: '@ssss',
-    remark: '说说说。。。。。。',
-  },
-]
-
 const BannerMGMT = () => {
   const [state, setState] = useState({
     total: 50,
     current: 1,
     pageSize: 10,
-    dataSource: data,
+    dataSource: [],
     filteredType: null,
     filteredStatus: null,
     sortedField: null,
@@ -108,10 +63,9 @@ const BannerMGMT = () => {
     }
 
     fetchBannerList(params)
-      .then((res) => {
-        console.log(res)
-        setState((state) => ({ ...state, tableLoading: false }))
-      })
+      .then((res) =>
+        setState((state) => ({ ...state, tableLoading: false, dataSource: res?.list, total: res?.total || 0 }))
+      )
       .catch(() => setState((state) => ({ ...state, tableLoading: false })))
   }, [
     current,
@@ -142,15 +96,11 @@ const BannerMGMT = () => {
       params.offShelfTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
 
       const { response } = bannerUrl[0]
-      params.bannerUrl = response
+      params.bannerUrl = 'response' // TODO
 
-      if (curModify) {
-        params.id = curModify.id
-        await updateBanner(params)
-      } else {
-        await addBanner(params)
-      }
-      setState((state) => ({ ...state, editLoading: false }))
+      curModify?.id && (params.id = curModify.id)
+      curModify?.id ? await updateBanner(params) : await addBanner(params)
+      setState((state) => ({ ...state, editLoading: false, modalVisible: false, curModify: null }))
       handleBannerList()
     } catch (err) {
       setState((state) => ({ ...state, editLoading: false }))
@@ -184,12 +134,14 @@ const BannerMGMT = () => {
     const { type, status } = filters
     const { field, order } = sorter
 
+    console.log(filters)
+
     setState((state) => ({
       ...state,
       current: state.pageSize === pageSize ? current : 1,
       pageSize,
-      filteredType: type?.[0],
-      filteredStatus: status?.[0],
+      filteredType: type?.join(','),
+      filteredStatus: status?.join(','),
       sortedOrder: order,
       sortedField: order ? field : null,
     }))
@@ -212,8 +164,7 @@ const BannerMGMT = () => {
       title: '横幅类型',
       dataIndex: 'type',
       width: 120,
-      filteredValue: filteredType ? [filteredType] : null,
-      filterMultiple: false,
+      filteredValue: filteredType?.split(',') || null,
       filters: advertTypeList,
       render: (t) => advertTypeMap[t]?.text,
     },
@@ -221,8 +172,7 @@ const BannerMGMT = () => {
       title: '状态',
       dataIndex: 'status',
       width: 88,
-      filteredValue: filteredStatus ? [filteredStatus] : null,
-      filterMultiple: false,
+      filteredValue: filteredStatus?.split(',') || null,
       filters: adStatusList,
       render: (t) => adStatusMap[t]?.text,
     },

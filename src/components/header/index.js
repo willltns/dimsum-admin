@@ -1,30 +1,44 @@
 import ss from './index.module.less'
-import bib from '@/assets/img/birb.png'
 
 import React, { useEffect } from 'react'
-import { Link, useHistory, useLocation } from 'react-router-dom'
+import { observer } from 'mobx-react'
 import { Dropdown } from 'antd'
+import { Link, useLocation } from 'react-router-dom'
+
+import { useStore } from '@/utils/hooks/useStore'
+import { logout } from '@/assets/xhr'
 
 function Header() {
-  const history = useHistory()
   const { pathname } = useLocation()
-
-  const userinfo = {}
+  const { common } = useStore()
 
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [pathname])
+
+  const onLogout = () =>
+    logout()
+      .then(() => common.updateUserinfo(null))
+      .catch(() => {})
 
   return (
     <header className={ss.header}>
       <Link className="logo" to="/">
         Dimsum
       </Link>
-      <div className={ss.admin}>
-        {userinfo && (
-          <Dropdown arrow placement="bottomCenter" overlay={<div className={ss.logoutBtn}>退出登录</div>}>
-            <i className={ss.charAvatar}>W</i>
-            {/*<img src={bib} alt="avatar" />*/}
+
+      <div className={ss.user}>
+        {common.userinfo && (
+          <Dropdown
+            arrow
+            placement="bottomCenter"
+            overlay={
+              <div className={ss.logoutBtn} onClick={onLogout}>
+                退出登录
+              </div>
+            }
+          >
+            <i className={ss.charAvatar}>{common.userinfo.name[0]}</i>
           </Dropdown>
         )}
       </div>
@@ -32,4 +46,4 @@ function Header() {
   )
 }
 
-export default Header
+export default observer(Header)

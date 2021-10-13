@@ -5,56 +5,18 @@ import { Button, Modal, Space, Table, Popconfirm, Row } from 'antd'
 
 import CoinForm from '@/components/coin-form'
 
-import { chainTypeList, chainTypeMap, coinStatusList, coinStatusMap } from '@/consts'
+import { chainTypeMap, coinStatusList, coinStatusMap } from '@/consts'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import ChainMGMT from '@/components/chain-mgmt'
 import { addCoin, updateCoin, fetchCoinList, updateCoinStatus, deleteCoin } from '@/pages/coin/xhr'
-
-const data = [
-  {
-    id: 1,
-    coinName: 'Baby Shark Doge',
-    coinSymbol: 'BSD',
-    coinChain: 20,
-    coinStatus: 10,
-    coinUpvotes: 1112,
-    coinUpvotesToday: 656,
-  },
-  {
-    id: 2,
-    coinName: 'Baby Shark Doge',
-    coinSymbol: 'BSD',
-    coinChain: 10,
-    coinStatus: 20,
-    coinUpvotes: 1112,
-    coinUpvotesToday: 656,
-  },
-  {
-    id: 3,
-    coinName: 'Baby Shark Doge',
-    coinSymbol: 'BSD',
-    coinChain: 30,
-    coinStatus: 30,
-    coinUpvotes: 22222,
-    coinUpvotesToday: 33,
-  },
-  {
-    id: 4,
-    coinName: 'Baby Shark Doge',
-    coinSymbol: 'BSD',
-    coinChain: 10,
-    coinStatus: 30,
-    coinUpvotes: 1111,
-    coinUpvotesToday: 666,
-  },
-]
+import { fetchChainList } from '@/components/chain-mgmt/xhr'
 
 const CoinMGMT = () => {
   const [state, setState] = React.useState({
     total: 50,
     current: 1,
     pageSize: 10,
-    dataSource: data,
+    dataSource: [],
     filteredChainType: null,
     filteredAuditStatus: null,
     filteredPromoted: null,
@@ -70,6 +32,7 @@ const CoinMGMT = () => {
     curModify: null,
     tableLoading: false,
     editLoading: false,
+    coinChainList: [],
   })
   const {
     total,
@@ -91,7 +54,16 @@ const CoinMGMT = () => {
     curModify,
     tableLoading,
     editLoading,
+    coinChainList,
   } = state
+
+  useEffect(() => {
+    fetchChainList()
+      .then((res) => setState((state) => ({ ...state, coinChainList: res?.list || [] })))
+      .catch(() => {})
+  }, [])
+
+  const updateChainList = useCallback((list) => setState((state) => ({ ...state, coinChainList: list })), [])
 
   const handleCoinList = useCallback(() => {
     setState((state) => ({ ...state, tableLoading: true }))
@@ -112,10 +84,9 @@ const CoinMGMT = () => {
     }
 
     fetchCoinList(params)
-      .then((res) => {
-        console.log(res)
-        setState((state) => ({ ...state, tableLoading: false }))
-      })
+      .then((res) =>
+        setState((state) => ({ ...state, tableLoading: false, dataSource: res?.list || [], total: res?.total || 0 }))
+      )
       .catch(() => setState((state) => ({ ...state, tableLoading: false })))
   }, [
     current,
@@ -141,7 +112,7 @@ const CoinMGMT = () => {
     setState((state) => ({ ...state, editLoading: true }))
     try {
       id ? await updateCoin({ ...params, id }) : await addCoin(params)
-      setState((state) => ({ ...state, editLoading: false }))
+      setState((state) => ({ ...state, editLoading: false, modalVisible: false }))
       handleCoinList()
     } catch (err) {
       setState((state) => ({ ...state, editLoading: false }))
@@ -183,8 +154,8 @@ const CoinMGMT = () => {
       ...state,
       current,
       pageSize,
-      filteredChainType: coinChain?.[0],
-      filteredCoinStatus: coinStatus?.[0],
+      filteredChainType: coinChain?.join(','),
+      filteredCoinStatus: coinStatus?.join(','),
       sortedOrder: order,
       sortedField: order ? field : null,
     }))
@@ -219,9 +190,8 @@ const CoinMGMT = () => {
       dataIndex: 'coinChain',
       width: 150,
       ellipsis: true,
-      filteredValue: filteredChainType ? [filteredChainType] : null,
-      filterMultiple: false,
-      filters: chainTypeList,
+      filteredValue: filteredChainType?.split(',') || null,
+      filters: coinChainList?.map((item) => ({ text: item.chainName, value: item.id })) || [],
       render: (t) => chainTypeMap[t]?.text,
     },
     {
@@ -287,8 +257,7 @@ const CoinMGMT = () => {
       dataIndex: 'coinStatus',
       width: 66,
       fixed: 'right',
-      filteredValue: filteredCoinStatus ? [filteredCoinStatus] : null,
-      filterMultiple: false,
+      filteredValue: filteredCoinStatus?.split(',') || null,
       filters: coinStatusList,
       render: (t) => coinStatusMap[t]?.text,
     },
@@ -341,7 +310,7 @@ const CoinMGMT = () => {
         <Button type="primary" onClick={() => setState((state) => ({ ...state, modalVisible: true }))}>
           添加代币
         </Button>
-        <ChainMGMT />
+        <ChainMGMT updateChainList={updateChainList} />
       </Row>
 
       <Space style={{ width: '100%' }}>
@@ -373,7 +342,7 @@ const CoinMGMT = () => {
         onCancel={() => setState((state) => ({ ...state, modalVisible: false, curModify: null }))}
         bodyStyle={{ height: '80vh', overflowY: 'auto' }}
       >
-        <CoinForm coinInfo={curModify} loading={editLoading} onOk={handleEditOk} />
+        <CoinForm coinInfo={curModify} loading={editLoading} onOk={handleEditOk} coinChainList={coinChainList} />
       </Modal>
     </section>
   )

@@ -17,7 +17,7 @@ const dateReg =
   /^(((20\d{2})-(0(1|[3-9])|1[012])-(0[1-9]|[12]\d|30))|((20\d{2})-(0[13578]|1[02])-31)|((20\d{2})-02-(0[1-9]|1\d|2[0-8]))|(((20([13579][26]|[2468][048]|0[48]))|(2000))-02-29))\s([0-1][0-9]|2[0-3]):([0-5][0-9])$/
 
 function CoinForm(props) {
-  const { coinInfo, loading, onOk } = props
+  const { coinInfo, loading, onOk, coinChainList } = props
 
   const uploadBtnRef = useRef(null)
   const linkTipRef = useRef(null)
@@ -40,8 +40,8 @@ function CoinForm(props) {
       linkTipRef.current.parentNode.scrollIntoView()
       return
     }
-    // TODO logo
     const params = { ...values, coinPresaleInfo, coinAirdropInfo }
+    params.coinLogo = 'https://www.xx.cc' // TODO logo
 
     onOk(params, coinInfo?.id || undefined)
   }
@@ -70,7 +70,7 @@ function CoinForm(props) {
           if (!atLeastOne.includes(Object.keys(changedValue)[0])) return
           linkTipRef.current.style.opacity = atLeastOne.every((key) => !allValues[key]) ? 1 : 0
         }}
-        initialValues={coinInfo?.id ? { ...coinInfo } : { coinLaunchDate: '2021-00-00 00:00' }}
+        initialValues={coinInfo?.id ? { ...coinInfo, coinLogo: [] } : { coinLaunchDate: '2021-00-00 00:00' }}
       >
         <Row className={ifZh(lang) ? ss.zhMode : ss.enMode}>
           <Col>
@@ -117,9 +117,9 @@ function CoinForm(props) {
             </Form.Item>
             <Form.Item label={tt.chain} name="coinChain" rules={[{ required: true }]}>
               <Select getPopupContainer={(tri) => tri.parentNode}>
-                {chainTypeList.map(({ value, text }) => (
-                  <Select.Option value={value} key={value}>
-                    {text}
+                {coinChainList.map(({ chainName, id }) => (
+                  <Select.Option value={id} key={id}>
+                    {chainName}
                   </Select.Option>
                 ))}
               </Select>

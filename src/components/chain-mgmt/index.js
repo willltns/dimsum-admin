@@ -2,12 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { Button, Form, Input, Modal, Table, Upload } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
 
-import { chainTypeList } from '@/consts'
 import { addChain, editChain, fetchChainList } from './xhr'
 
-const data = chainTypeList.map((item, index) => ({ id: item.value, chainName: item.text, sort: index }))
-
-function ChainMGMT() {
+function ChainMGMT(props) {
   const [state, setState] = useState({
     modalVisible: false,
     curModify: null,
@@ -20,8 +17,11 @@ function ChainMGMT() {
   const handleChainList = () => {
     setState((state) => ({ ...state, tableLoading: true }))
     fetchChainList()
-      .then((res) => setState((state) => ({ ...state, tableLoading: false, dataSource: res })))
-      .catch(() => setState((state) => ({ ...state, tableLoading: false, dataSource: data })))
+      .then((res) => {
+        props.updateChainList(res?.list || [])
+        setState((state) => ({ ...state, tableLoading: false, dataSource: res?.list || [] }))
+      })
+      .catch(() => setState((state) => ({ ...state, tableLoading: false })))
   }
 
   useEffect(() => {
@@ -32,7 +32,10 @@ function ChainMGMT() {
     setState((state) => ({ ...state, editLoading: true }))
 
     try {
-      curModify?.id ? await editChain({ ...values, id: curModify.id }) : await addChain(values)
+      const params = { ...values }
+      curModify?.id && (params.id = curModify.id)
+      params.logo = 'https://www.baidu.com' // TODO
+      curModify?.id ? await editChain({ ...params, id: curModify.id }) : await addChain(params)
       setState((state) => ({ ...state, editLoading: false, curModify: null }))
       handleChainList()
     } catch (err) {
@@ -101,7 +104,7 @@ function ChainMGMT() {
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
           onFinish={onFormFinish}
-          initialValues={curModify?.id ? { ...curModify } : undefined}
+          initialValues={curModify?.id ? { ...curModify, logo: [] } : undefined}
         >
           <Form.Item label="主网名" name="chainName" rules={[{ required: true, whitespace: true }]}>
             <Input />

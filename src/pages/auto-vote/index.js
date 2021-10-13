@@ -9,85 +9,12 @@ import XhrCoinSelect from '@/components/xhr-coin-select'
 import { autoVoteStatusList, autoVoteStatusMap } from './consts'
 import { addAutoVote, fetchAutoVoteList, updateAutoVoteStatus, deleteAutoVote } from '@/pages/auto-vote/xhr'
 
-const data = [
-  {
-    id: 1,
-    coinId: 112,
-    coinName: 'FLOKI',
-    coinSymbol: 'FLOKI',
-    status: 10,
-    votes: 300,
-    votedVotes: 11,
-    coinUpvotes: 33333,
-    coinUpvotesToday: 2222,
-    startTime: '2020-12-12 12:00:00',
-    endTime: '2020-12-15 12:00:00',
-    remark: '范德萨发个',
-  },
-  {
-    id: 3,
-    coinId: 115,
-    coinName: 'FLOKI',
-    coinSymbol: 'FLOKI',
-    coinUpvotes: 33333,
-    coinUpvotesToday: 2222,
-    status: 20,
-    votes: 300,
-    votedVotes: 11,
-    startTime: '2020-12-12 12:00:00',
-    endTime: '2020-12-15 12:00:00',
-    remark: '范德萨发个',
-  },
-  {
-    id: 2,
-    coinId: 115,
-    coinName: 'FLOKI',
-    coinSymbol: 'FLOKI',
-    status: 30,
-    votes: 300,
-    votedVotes: 11,
-    coinUpvotes: 33333,
-    coinUpvotesToday: 2222,
-    startTime: '2020-12-12 12:00:00',
-    endTime: '2020-12-15 12:00:00',
-    remark: '范德萨发个',
-  },
-  {
-    id: 55,
-    coinId: 115,
-    coinName: 'FLOKI',
-    coinSymbol: 'FLOKI',
-    status: 40,
-    votes: 300,
-    votedVotes: 11,
-    coinUpvotes: 33333,
-    coinUpvotesToday: 2222,
-    startTime: '2020-12-12 12:00:00',
-    endTime: '2020-12-15 12:00:00',
-    remark: '范德萨发个',
-  },
-  {
-    id: 44,
-    coinId: 115,
-    coinName: 'FLOKI',
-    coinSymbol: 'FLOKI',
-    status: 50,
-    votes: 300,
-    votedVotes: 222,
-    coinUpvotes: 33333,
-    coinUpvotesToday: 2222,
-    startTime: '2020-12-12 12:00:00',
-    endTime: '2020-12-15 12:00:00',
-    remark: '范德萨发个',
-  },
-]
-
 const AutoVote = () => {
   const [state, setState] = React.useState({
     total: 50,
     current: 1,
     pageSize: 10,
-    dataSource: data,
+    dataSource: [],
     filteredStatus: null,
     sortedField: null,
     sortedOrder: null,
@@ -133,10 +60,9 @@ const AutoVote = () => {
     }
 
     fetchAutoVoteList(params)
-      .then((res) => {
-        console.log(res)
-        setState((state) => ({ ...state, tableLoading: false }))
-      })
+      .then((res) =>
+        setState((state) => ({ ...state, tableLoading: false, dataSource: res?.list || [], total: res?.total || 0 }))
+      )
       .catch(() => setState((state) => ({ ...state, tableLoading: false })))
   }, [current, pageSize, filteredStatus, sortedField, sortedOrder, coinId, coinName, coinSymbol, remark])
 
@@ -195,7 +121,7 @@ const AutoVote = () => {
       ...state,
       current,
       pageSize,
-      filteredStatus: status?.[0],
+      filteredStatus: status?.join(','),
       sortedOrder: order,
       sortedField: order ? field : null,
     }))
@@ -242,8 +168,7 @@ const AutoVote = () => {
       title: '状态',
       width: 88,
       dataIndex: 'status',
-      filteredValue: filteredStatus ? [filteredStatus] : null,
-      filterMultiple: false,
+      filteredValue: filteredStatus?.split(',') || null,
       filters: autoVoteStatusList,
       render: (t) => autoVoteStatusMap[t]?.text,
     },

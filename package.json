@@ -71,5 +71,6 @@
       "prettier --parser css --write",
       "git add"
     ]
-  }
+  },
+  "proxy": "http://118.25.189.20:8080"
 }

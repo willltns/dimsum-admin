@@ -131,10 +131,9 @@ const VotePromo = () => {
     }
 
     fetchVotePromoList(params)
-      .then((res) => {
-        console.log(res)
-        setState((state) => ({ ...state, tableLoading: false }))
-      })
+      .then((res) =>
+        setState((state) => ({ ...state, tableLoading: false, dataSource: res?.list, total: res?.total || 0 }))
+      )
       .catch(() => setState((state) => ({ ...state, tableLoading: false })))
   }, [current, pageSize, filteredType, filteredStatus, sortedField, sortedOrder, voteName, remark])
 
@@ -154,7 +153,7 @@ const VotePromo = () => {
       params.endTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
 
       await addVotePromo(params)
-      setState((state) => ({ ...state, editLoading: false }))
+      setState((state) => ({ ...state, editLoading: false, modalVisible: false, voteType: 10 }))
       handleVotePromoList()
     } catch (err) {
       setState((state) => ({ ...state, editLoading: false }))
@@ -203,7 +202,7 @@ const VotePromo = () => {
       current,
       pageSize,
       filteredType: type?.[0],
-      filteredStatus: status?.[0],
+      filteredStatus: status?.join(','),
       sortedOrder: order,
       sortedField: order ? field : null,
     }))
@@ -247,8 +246,7 @@ const VotePromo = () => {
       title: '状态',
       width: 100,
       dataIndex: 'status',
-      filteredValue: filteredStatus ? [filteredStatus] : null,
-      filterMultiple: false,
+      filteredValue: filteredStatus?.split(',') || null,
       filters: votePromoStatusList,
       render: (t) => votePromoStatusMap[t]?.text,
     },
@@ -464,7 +462,7 @@ const VotePromo = () => {
             <p>
               选项 {index + 1}：
               <b>
-                {votePromoDetail?.type === 10 ? `${item.coinName} ($${item.coinSymbol}) ${item.coinId}` : item.option}
+                {+votePromoDetail?.type === 10 ? `${item.coinName} ($${item.coinSymbol}) ${item.coinId}` : item.option}
               </b>
             </p>
             <div>

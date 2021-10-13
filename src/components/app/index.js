@@ -1,7 +1,7 @@
 import ss from './index.module.less'
 
 import { BrowserRouter } from 'react-router-dom'
-import { MobXProviderContext } from 'mobx-react'
+import { MobXProviderContext, Observer } from 'mobx-react'
 import { ConfigProvider, message } from 'antd'
 import zhCN from 'antd/lib/locale/zh_CN'
 import 'moment/locale/zh-cn'
@@ -23,10 +23,16 @@ function App() {
         <ConfigProvider locale={zhCN}>
           <Header />
 
-          <div className={ss.main}>
-            <Sidebar />
-            <RouteWithSubRoutes routes={routes} />
-          </div>
+          <Observer
+            render={() =>
+              rootStore.common.userinfo === undefined ? (
+                <div className={ss.main}>
+                  <Sidebar />
+                  <RouteWithSubRoutes routes={routes} />
+                </div>
+              ) : null
+            }
+          />
 
           <LoginModal />
         </ConfigProvider>
