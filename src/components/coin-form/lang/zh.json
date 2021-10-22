@@ -7,7 +7,7 @@
   "clickToUpload": "点击上传",
   "description": "代币描述",
   "launchDate": "发布日期 UTC+8 (YYYY-MM-DD HH:mm)",
-  "contractAddressTitle": "合约信息",
+  "contractInfoTitle": "合约信息",
   "chain": "主网",
   "contractAddress": "合约地址",
   "presale_airdrop": "预售信息 和 空投信息",

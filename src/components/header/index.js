@@ -24,7 +24,7 @@ function Header() {
   return (
     <header className={ss.header}>
       <Link className="logo" to="/">
-        Dimsum
+        CoinMoments
       </Link>
 
       <div className={ss.user}>

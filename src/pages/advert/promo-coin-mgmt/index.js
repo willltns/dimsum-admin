@@ -5,9 +5,11 @@ import { Button, DatePicker, Form, Input, Modal, Table, Space, Popconfirm } from
 import { promoCoinStatusList, promoCoinStatusMap } from '@/consts'
 import moment from 'moment'
 
+import { updateCoin } from '@/pages/coin/xhr'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
+import { fetchPromoCoinList } from '@/pages/advert/xhr'
+
 import XhrCoinSelect from '@/components/xhr-coin-select'
-import { fetchPromoCoinList, addPromoCoin, updatePromoCoin, updatePromoCoinStatus } from '@/pages/advert/xhr'
 
 const PromoCoinMGMT = () => {
   const [state, setState] = useState({
@@ -53,7 +55,7 @@ const PromoCoinMGMT = () => {
     const params = {
       pageNo: current,
       pageSize,
-      status: filteredStatus,
+      promotedStatus: filteredStatus,
       sortedField,
       sortedOrder,
       coinId,
@@ -95,11 +97,12 @@ const PromoCoinMGMT = () => {
       const values = await form.validateFields()
       const { timeRange, ...params } = values
 
-      params.shelfTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')
-      params.offShelfTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
-
+      !curModify?.id && (params.promoted = 1)
       curModify?.id && (params.id = curModify.id)
-      curModify?.id ? await updatePromoCoin(params) : await addPromoCoin(params)
+      params.promotedShelfTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')
+      params.promotedOffShelfTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
+
+      await updateCoin(params)
       setState((state) => ({ ...state, editLoading: false, modalVisible: false, curModify: null }))
       handlePromoCoinList()
     } catch (err) {
@@ -107,11 +110,11 @@ const PromoCoinMGMT = () => {
     }
   }
 
-  const handleUpdateStatus = async (id, status) => {
+  const handleUpdateStatus = async (id, promotedStatus) => {
     setState((state) => ({ ...state, editLoading: true }))
 
     try {
-      await updatePromoCoinStatus({ id, status })
+      await updateCoin({ id, promotedStatus })
       setState((state) => ({ ...state, editLoading: false }))
       handlePromoCoinList()
     } catch (err) {
@@ -131,14 +134,14 @@ const PromoCoinMGMT = () => {
 
   const onTableChange = (pagination, filters, sorter) => {
     const { current, pageSize } = pagination
-    const { status } = filters
+    const { promotedStatus } = filters
     const { field, order } = sorter
 
     setState((state) => ({
       ...state,
       current: state.pageSize === pageSize ? current : 1,
       pageSize,
-      filteredStatus: status?.join(','),
+      filteredStatus: promotedStatus?.join(','),
       sortedOrder: order,
       sortedField: order ? field : null,
     }))
@@ -147,13 +150,13 @@ const PromoCoinMGMT = () => {
   const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value, current: 1 }))
 
   const columns = [
-    //{ title: 'id', dataIndex: 'id', fixed: 'left', width: 80 },
+    //{ title: 'ID', dataIndex: 'id', fixed: 'left', width: 80 },
     {
-      title: '代币id',
-      dataIndex: 'coinId',
+      title: '代币 ID',
+      dataIndex: 'id',
       fixed: 'left',
       width: 150,
-      ...getColumnSearchProps('代币名称', 'coinId', handleInputSearch, coinId),
+      ...getColumnSearchProps('代币 ID', 'id', handleInputSearch, coinId),
     },
     {
       title: '代币名称',
@@ -170,7 +173,7 @@ const PromoCoinMGMT = () => {
     },
     {
       title: '状态',
-      dataIndex: 'status',
+      dataIndex: 'promotedStatus',
       width: 88,
       filteredValue: filteredStatus?.split(',') || null,
       filters: promoCoinStatusList,
@@ -178,20 +181,33 @@ const PromoCoinMGMT = () => {
     },
     {
       title: '上架时间',
-      dataIndex: 'shelfTime',
+      dataIndex: 'promotedShelfTime',
       width: 170,
       sorter: true,
-      sortOrder: sortedField === 'shelfTime' ? sortedOrder : false,
+      sortOrder: sortedField === 'promotedShelfTime' ? sortedOrder : false,
     },
     {
       title: '下架时间',
-      dataIndex: 'offShelfTime',
+      dataIndex: 'promotedOffShelfTime',
       width: 170,
       sorter: true,
-      sortOrder: sortedField === 'offShelfTime' ? sortedOrder : false,
+      sortOrder: sortedField === 'promotedOffShelfTime' ? sortedOrder : false,
     },
-
-    { title: '价格', dataIndex: 'price', width: 120 },
+    {
+      title: '投票数',
+      dataIndex: 'coinUpvotes',
+      width: 100,
+      sorter: true,
+      sortOrder: sortedField === 'coinUpvotes' ? sortedOrder : false,
+    },
+    {
+      title: '今日投票数',
+      dataIndex: 'coinUpvotestoday',
+      width: 100,
+      sorter: true,
+      sortOrder: sortedField === 'coinUpvotesToday' ? sortedOrder : false,
+    },
+    { title: '价格', dataIndex: 'promotedPrice', width: 120 },
     {
       title: '联系邮箱',
       dataIndex: 'contactEmail',
@@ -206,7 +222,7 @@ const PromoCoinMGMT = () => {
     },
     {
       title: '备注',
-      dataIndex: 'remark',
+      dataIndex: 'promotedRemark',
       width: 200,
       ...getColumnSearchProps('备注', 'remark', handleInputSearch, remark),
     },
@@ -224,8 +240,8 @@ const PromoCoinMGMT = () => {
             size="small"
             onClick={() => {
               setState((state) => ({ ...state, modalVisible: true, curModify: r }))
-              const fields = { ...r }
-              fields.timeRange = [moment(r.shelfTime), moment(r.offShelfTime)]
+              const fields = { ...r, id: `${r.coinName} ($${r.coinSymbol}) ${r.id}` }
+              fields.timeRange = [moment(r.promotedShelfTime), moment(r.promotedOffShelfTime)]
               setTimeout(() => form.setFieldsValue({ ...fields }))
             }}
           >
@@ -233,19 +249,19 @@ const PromoCoinMGMT = () => {
           </Button>
           <Popconfirm
             title={`上架 $${r.coinSymbol} ？`}
-            disabled={+r.status === 20 || editLoading}
+            disabled={+r.promotedStatus === 20 || editLoading}
             onConfirm={() => handleUpdateStatus(r.id, 20)}
           >
-            <Button type="link" size="small" disabled={+r.status === 20 || editLoading}>
+            <Button type="link" size="small" disabled={+r.promotedStatus === 20 || editLoading}>
               上架
             </Button>
           </Popconfirm>
           <Popconfirm
             title={`下架 $${r.coinSymbol} ？`}
-            disabled={+r.status === 30 || editLoading}
+            disabled={+r.promotedStatus === 30 || editLoading}
             onConfirm={() => handleUpdateStatus(r.id, 30)}
           >
-            <Button type="text" size="small" disabled={+r.status === 30 || editLoading}>
+            <Button type="text" size="small" disabled={+r.promotedStatus === 30 || editLoading}>
               下架
             </Button>
           </Popconfirm>
@@ -290,7 +306,7 @@ const PromoCoinMGMT = () => {
         onOk={handleEditOk}
       >
         <Form form={form} labelCol={{ span: 5 }} wrapperCol={{ span: 17 }}>
-          <Form.Item label="代币" name="coinId" rules={[{ required: true }]}>
+          <Form.Item label="代币" name="id" rules={[{ required: true }]}>
             <XhrCoinSelect disabled={!!curModify?.id} />
           </Form.Item>
 
@@ -305,11 +321,11 @@ const PromoCoinMGMT = () => {
             />
           </Form.Item>
 
-          <Form.Item label="价格" name="price" rules={[{ required: true }]}>
+          <Form.Item label="价格" name="promotedPrice" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
 
-          <Form.Item label="备注" name="remark">
+          <Form.Item label="备注" name="promotedRemark">
             <Input.TextArea />
           </Form.Item>
         </Form>

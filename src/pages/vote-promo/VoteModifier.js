@@ -20,7 +20,7 @@ function VoteModifier(props) {
     if (!voteNum) return
     setState((state) => ({ ...state, loading: true }))
     try {
-      await addOptionVotes({ optionId, upvotes: voteNum })
+      await addOptionVotes({ optionId: optionId, upvotes: +voteNum })
       cbSuccess()
       onCancel()
     } catch (err) {

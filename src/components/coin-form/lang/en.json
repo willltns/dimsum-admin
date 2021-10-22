@@ -7,7 +7,7 @@
   "clickToUpload": "Click to Upload",
   "description": "Description",
   "launchDate": "Launch date UTC+8 (YYYY-MM-DD HH:mm)",
-  "contractAddressTitle": "Contract Address",
+  "contractInfoTitle": "Contract Info",
   "chain": "Chain",
   "contractAddress": "Contract Address",
   "presale_airdrop": "Presale & Airdrop",

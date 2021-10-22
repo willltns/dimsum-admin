@@ -15,7 +15,7 @@ export const updateBannerStatus = (params) => axios.post('/advert/banner/edit/st
 
 // 推广代币 api
 
-export const fetchPromoCoinList = (params) => axios.post('/advert/promo-coin/list', clearFalsyFields(params))
+export const fetchPromoCoinList = (params) => axios.post('/coin/list', clearFalsyFields({ ...params, promoted: 1 }))
 
 export const addPromoCoin = (params) => axios.post('/advert/promo-coin/add', params)
 

@@ -11,80 +11,12 @@ import { votePromoTypeList, votePromoStatusList, votePromoTypeMap, votePromoStat
 import VoteModifier from '@/pages/vote-promo/VoteModifier'
 import { addVotePromo, fetchVotePromoDetail, fetchVotePromoList, updateVotePromoStatus } from '@/pages/vote-promo/xhr'
 
-const data = [
-  {
-    id: 1,
-    voteName: '哪个代币获得两天免费推广？',
-    type: 10,
-    status: 10,
-    startTime: '2020-12-12 12:00:00',
-    endTime: '2020-12-12 12:00:00',
-    remark: '范德萨发个',
-  },
-  {
-    id: 2,
-    voteName: '哪个代币获得两天免费推广？',
-    type: 20,
-    status: 20,
-    startTime: '2020-12-12 12:00:00',
-    endTime: '2020-12-12 12:00:00',
-    remark: '范德萨发个',
-  },
-  {
-    id: 4,
-    voteName: '哪个代币获得两天免费推广？',
-    type: 20,
-    status: 30,
-    startTime: '2020-12-12 12:00:00',
-    endTime: '2020-12-12 12:00:00',
-    remark: '范德萨发个',
-  },
-  {
-    id: 5,
-    voteName: '哪个代币获得两天免费推广？',
-    type: 20,
-    status: 40,
-    startTime: '2020-12-12 12:00:00',
-    endTime: '2020-12-12 12:00:00',
-    remark: '范德萨发个',
-  },
-  {
-    id: 6,
-    voteName: '哪个代币获得两天免费推广？',
-    type: 20,
-    status: 50,
-    startTime: '2020-12-12 12:00:00',
-    endTime: '2020-12-12 12:00:00',
-    remark: '范德萨发个',
-  },
-]
-
-const vv = {
-  id: 1,
-  type: 20,
-  voteName: '是生生世世',
-  startTime: '2022-12-12 12:12:12',
-  endTime: '2022-12-12 12:12:12',
-  optionList: [
-    {
-      optionId: 2,
-      option: '点都德',
-      upvotes: 555,
-    },
-    {
-      optionId: 3,
-      option: '点都德',
-      upvotes: 555,
-    },
-  ],
-}
-
 const VotePromo = () => {
   const [state, setState] = useState({
     total: 50,
     current: 1,
     pageSize: 10,
-    dataSource: data,
+    dataSource: [],
     filteredType: null,
     filteredStatus: null,
     sortedField: null,
@@ -149,6 +81,7 @@ const VotePromo = () => {
       const values = await form.validateFields()
       const { timeRange, ...params } = values
 
+      params.type = voteType
       params.startTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')
       params.endTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
 
@@ -176,9 +109,9 @@ const VotePromo = () => {
     setState((state) => ({ ...state, detailLoading: true }))
     try {
       const res = await fetchVotePromoDetail({ id })
-      setState((state) => ({ ...state, detailLoading: false, votePromoDetail }))
+      setState((state) => ({ ...state, detailLoading: false, votePromoDetail: res }))
     } catch (err) {
-      setState((state) => ({ ...state, detailLoading: false, votePromoDetail: { ...vv } }))
+      setState((state) => ({ ...state, detailLoading: false }))
     }
   }
 
@@ -211,7 +144,7 @@ const VotePromo = () => {
   const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value, current: 1 }))
 
   const columns = [
-    { title: 'id', dataIndex: 'id', fixed: 'left', width: 80 },
+    { title: 'ID', dataIndex: 'id', fixed: 'left', width: 80 },
     {
       title: '投票主题',
       dataIndex: 'voteName',
@@ -260,7 +193,7 @@ const VotePromo = () => {
       title: '操作',
       align: 'center',
       dataIndex: 'operate',
-      width: 220,
+      width: 160,
       fixed: 'right',
       render: (_, r) => (
         <Space>
@@ -276,7 +209,7 @@ const VotePromo = () => {
               激活
             </Button>
           </Popconfirm>
-          <Popconfirm
+          {/*<Popconfirm
             title={`完成 id 为 ${r.id} 的投票 ？`}
             disabled={+r.status !== 30 || editLoading}
             onConfirm={() => handleUpdateStatus(r.id, 40)}
@@ -284,7 +217,7 @@ const VotePromo = () => {
             <Button type="link" size="small" disabled={+r.status !== 30 || editLoading}>
               完成
             </Button>
-          </Popconfirm>
+          </Popconfirm>*/}
           <Popconfirm
             title={`取消 id 为 ${r.id} 的投票 ？`}
             disabled={+r.status === 50 || editLoading}
@@ -387,7 +320,7 @@ const VotePromo = () => {
                       rules={[
                         {
                           validator(_, value) {
-                            return !value?.trim()
+                            return value === undefined || !(value + '').trim()
                               ? Promise.reject(new Error(voteType === 10 ? '请选择代币' : '请输入选项内容或删除该选项'))
                               : Promise.resolve()
                           },
@@ -457,17 +390,19 @@ const VotePromo = () => {
         <Divider style={{ margin: '16px 0' }} />
         <p />
 
-        {votePromoDetail?.optionList?.map((item, index) => (
+        {votePromoDetail?.voteItems?.map((item, index) => (
           <div className={ss.option} key={item.optionId}>
             <p>
               选项 {index + 1}：
               <b>
-                {+votePromoDetail?.type === 10 ? `${item.coinName} ($${item.coinSymbol}) ${item.coinId}` : item.option}
+                {+votePromoDetail?.type === 10
+                  ? `${item.coinName} ($${item.coinSymbol}) ${item.coinId}`
+                  : item.optionDesc}
               </b>
             </p>
             <div>
               <span>
-                百分比: <b>63.2%</b> {/* TODO */}
+                百分比: <b>{item.percentage}</b> {/* TODO */}
               </span>
               <span>
                 投票数: <b>{item.upvotes}</b>

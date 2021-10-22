@@ -1,13 +1,14 @@
 import ss from './index.module.less'
 
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { Form, Input, Upload, Button, Row, Col, Select, Modal } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
 
 import zh from './lang/zh.json'
 import en from './lang/en.json'
-import { chainTypeList } from '@/consts'
+import { urlReg } from '@/consts'
 import { descPH, presalePH, airdropPH, presaleTemplate, airdropTemplate, additionalLinkPH } from './const'
+import { handleFileUpload } from '@/components/chain-mgmt'
 
 // 是否中文
 const ifZh = (lang) => lang === 'zh'
@@ -31,17 +32,32 @@ function CoinForm(props) {
   })
   const { lang, coinPresaleInfo, coinAirdropInfo, presaleModalVisible, airdropModalVisible } = state
 
+  useEffect(() => {
+    if (!coinInfo?.id) return
+    setState((state) => ({
+      ...state,
+      coinPresaleInfo: coinInfo.coinPresaleInfo || '',
+      coinAirdropInfo: coinInfo.coinAirdropInfo || '',
+    }))
+  }, [coinInfo])
+
   const tt = ifZh(lang) ? zh : en
 
   const onFinish = (values) => {
-    const { linkWebsite, linkChineseTg, linkEnglishTg, linkTwitter, linkDiscord, linkAdditionalInfo } = values
-    if ([linkWebsite, linkChineseTg, linkEnglishTg, linkTwitter, linkDiscord, linkAdditionalInfo].every((i) => !i)) {
+    const { linkWebsite, linkChineseTg, linkEnglishTg, linkTwitter, linkMedium, linkDiscord, linkAdditionalInfo } =
+      values
+    if (
+      [linkWebsite, linkChineseTg, linkEnglishTg, linkTwitter, linkMedium, linkDiscord, linkAdditionalInfo].every(
+        (i) => !i
+      )
+    ) {
       linkTipRef.current.style.opacity = 1
       linkTipRef.current.parentNode.scrollIntoView()
       return
     }
-    const params = { ...values, coinPresaleInfo, coinAirdropInfo }
-    params.coinLogo = 'https://www.xx.cc' // TODO logo
+
+    const params = { ...values, coinPresaleInfo, coinAirdropInfo, linkAdditionalInfo: linkAdditionalInfo?.trim() || '' }
+    params.coinLogo = params.coinLogo?.[0]?.response
 
     onOk(params, coinInfo?.id || undefined)
   }
@@ -63,14 +79,24 @@ function CoinForm(props) {
         className={ss.form}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
-        validateMessages={{ required: ' ', whitespace: ' ' }}
+        validateMessages={{ required: ' ', whitespace: ' ', pattern: { mismatch: ` ` } }}
         onValuesChange={(changedValue, allValues) => {
           // prettier-ignore
-          const atLeastOne = ['linkWebsite', 'linkChineseTg', 'linkEnglishTg', 'linkTwitter', 'linkDiscord', 'linkAdditionalInfo']
+          const atLeastOne = ['linkWebsite', 'linkChineseTg', 'linkEnglishTg', 'linkTwitter', 'linkMedium', 'linkDiscord', 'linkAdditionalInfo']
           if (!atLeastOne.includes(Object.keys(changedValue)[0])) return
           linkTipRef.current.style.opacity = atLeastOne.every((key) => !allValues[key]) ? 1 : 0
         }}
-        initialValues={coinInfo?.id ? { ...coinInfo, coinLogo: [] } : { coinLaunchDate: '2021-00-00 00:00' }}
+        initialValues={
+          coinInfo?.id
+            ? {
+                ...coinInfo,
+                coinLogo: coinInfo.coinLogo
+                  ? [{ uid: '001', status: 'done', name: coinInfo.coinName + ' - icon', response: coinInfo.coinLogo }]
+                  : undefined,
+                coinLaunchDate: coinInfo.coinLaunchDate?.slice(0, -3),
+              }
+            : { coinLaunchDate: '2021-00-00 00:00' }
+        }
       >
         <Row className={ifZh(lang) ? ss.zhMode : ss.enMode}>
           <Col>
@@ -78,10 +104,10 @@ function CoinForm(props) {
               <h2>{tt.coinInfoTitle}</h2>
             </Form.Item>
             <Form.Item label={tt.name} name="coinName" rules={[{ required: true, whitespace: true }]}>
-              <Input />
+              <Input placeholder="e.g. Bitcoin" />
             </Form.Item>
             <Form.Item label={tt.symbol} name="coinSymbol" rules={[{ required: true, whitespace: true }]}>
-              <Input />
+              <Input placeholder="e.g. BTC" />
             </Form.Item>
             <Form.Item
               label={tt.logo}
@@ -90,18 +116,14 @@ function CoinForm(props) {
               valuePropName="fileList"
               rules={[{ required: true }]}
             >
-              <Upload name="logo" action="/upload.do" listType="picture" maxCount={1}>
-                <Button
-                  ref={uploadBtnRef}
-                  icon={<UploadOutlined />}
-                  onClick={() => (uploadBtnRef.current.style.borderColor = '')}
-                >
+              <Upload name="logo" customRequest={handleFileUpload} listType="picture" maxCount={1}>
+                <Button ref={uploadBtnRef} icon={<UploadOutlined />} onClick={() => (uploadBtnRef.current.style = '')}>
                   {tt.clickToUpload}
                 </Button>
               </Upload>
             </Form.Item>
             <Form.Item label={tt.description} name="coinDescription" rules={[{ required: true, whitespace: true }]}>
-              <Input.TextArea autoSize={{ minRows: 6 }} placeholder={descPH} />
+              <Input.TextArea autoSize={{ minRows: 8 }} placeholder={descPH} />
             </Form.Item>
             <Form.Item
               label={tt.launchDate}
@@ -109,14 +131,14 @@ function CoinForm(props) {
               validateTrigger="onBlur"
               rules={[{ required: true }, { pattern: dateReg, message: ' ' }]}
             >
-              <Input placeholder="YYYY-MM-DD HH:mm:ss" />
+              <Input placeholder="YYYY-MM-DD HH:mm" />
             </Form.Item>
 
             <Form.Item noStyle>
-              <h2>{tt.contractAddressTitle}</h2>
+              <h2>{tt.contractInfoTitle}</h2>
             </Form.Item>
             <Form.Item label={tt.chain} name="coinChain" rules={[{ required: true }]}>
-              <Select getPopupContainer={(tri) => tri.parentNode}>
+              <Select placeholder="Select..." getPopupContainer={(tri) => tri.parentNode}>
                 {coinChainList.map(({ chainName, id }) => (
                   <Select.Option value={id} key={id}>
                     {chainName}
@@ -125,7 +147,7 @@ function CoinForm(props) {
               </Select>
             </Form.Item>
             <Form.Item label={tt.contractAddress} name="coinAddress" rules={[{ whitespace: true }]}>
-              <Input />
+              <Input placeholder="0x0000...." />
             </Form.Item>
 
             <Form.Item noStyle>
@@ -150,27 +172,29 @@ function CoinForm(props) {
 
           <Col>
             <Form.Item noStyle>
-              <h2>
-                {tt.linkTitle}
-                <span className={ss.linkTip} ref={linkTipRef}>
-                  {tt.linkTip}
-                </span>
-              </h2>
+              {/* prettier-ignore */}
+              <h2>{tt.linkTitle}<span className={ss.linkTip} ref={linkTipRef}>{tt.linkTip}</span></h2>
             </Form.Item>
-            <Form.Item label={tt.website} name="linkWebsite" rules={[{ whitespace: true }]}>
-              <Input />
+            {/* prettier-ignore */}
+            <Form.Item label={tt.website} name="linkWebsite" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
+              <Input placeholder="https://..." />
             </Form.Item>
-            <Form.Item label={tt.chineseTG} name="linkChineseTg" rules={[{ whitespace: true }]}>
-              <Input />
+            {/* prettier-ignore */}
+            <Form.Item label={tt.chineseTG} name="linkChineseTg" rules={[{ whitespace: true }]} validateTrigger="onBlur">
+              <Input placeholder="https://..." />
             </Form.Item>
-            <Form.Item label={tt.englishTG} name="linkEnglishTg" rules={[{ whitespace: true }]}>
-              <Input />
+            {/* prettier-ignore */}
+            <Form.Item label={tt.englishTG} name="linkEnglishTg" rules={[{ whitespace: true }]} validateTrigger="onBlur">
+              <Input placeholder="https://..." />
             </Form.Item>
-            <Form.Item label={tt.twitter} name="linkTwitter" rules={[{ whitespace: true }]}>
-              <Input />
+            <Form.Item label={tt.twitter} name="linkTwitter" rules={[{ whitespace: true }]} validateTrigger="onBlur">
+              <Input placeholder="https://..." />
             </Form.Item>
-            <Form.Item label={tt.discord} name="linkDiscord" rules={[{ whitespace: true }]}>
-              <Input />
+            <Form.Item label={tt.medium} name="linkMedium" rules={[{ whitespace: true }]} validateTrigger="onBlur">
+              <Input placeholder="https://..." />
+            </Form.Item>
+            <Form.Item label={tt.discord} name="linkDiscord" rules={[{ whitespace: true }]} validateTrigger="onBlur">
+              <Input placeholder="https://..." />
             </Form.Item>
             <Form.Item label={tt.addLinkInfo} name="linkAdditionalInfo" rules={[{ whitespace: true }]}>
               <Input.TextArea autoSize={{ minRows: 6 }} placeholder={additionalLinkPH} />
@@ -179,8 +203,13 @@ function CoinForm(props) {
             <Form.Item noStyle>
               <h2>{tt.contactInfoTitle}</h2>
             </Form.Item>
-            <Form.Item label={tt.contactEmail} name="contactEmail" rules={[{ required: true, whitespace: true }]}>
-              <Input />
+            <Form.Item
+              label={tt.contactEmail}
+              name="contractEmail"
+              validateTrigger="onBlur"
+              rules={[{ required: true }, { type: 'email' }]}
+            >
+              <Input placeholder="contact@coinmoments.com" />
             </Form.Item>
             <Form.Item label={tt.contactTelegram} name="contactTg" rules={[{ whitespace: true }]}>
               <Input />

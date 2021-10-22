@@ -3,6 +3,7 @@ import { Button, Form, Input, Modal, Table, Upload } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
 
 import { addChain, editChain, fetchChainList } from './xhr'
+import { uploadFile } from '@/assets/xhr'
 
 function ChainMGMT(props) {
   const [state, setState] = useState({
@@ -34,7 +35,7 @@ function ChainMGMT(props) {
     try {
       const params = { ...values }
       curModify?.id && (params.id = curModify.id)
-      params.logo = 'https://www.baidu.com' // TODO
+      params.logo = params.logo?.[0]?.response || ''
       curModify?.id ? await editChain({ ...params, id: curModify.id }) : await addChain(params)
       setState((state) => ({ ...state, editLoading: false, curModify: null }))
       handleChainList()
@@ -44,7 +45,7 @@ function ChainMGMT(props) {
   }
 
   const columns = [
-    { title: 'id', dataIndex: 'id' },
+    { title: 'ID', dataIndex: 'id' },
     { title: '主网名', dataIndex: 'chainName', width: 270 },
     { title: '排序', dataIndex: 'sort', width: 66 },
     {
@@ -104,7 +105,16 @@ function ChainMGMT(props) {
           labelCol={{ span: 6 }}
           wrapperCol={{ span: 16 }}
           onFinish={onFormFinish}
-          initialValues={curModify?.id ? { ...curModify, logo: [] } : undefined}
+          initialValues={
+            curModify?.id
+              ? {
+                  ...curModify,
+                  logo: curModify.logo
+                    ? [{ uid: '001', status: 'done', name: curModify.chainName + ' - icon', response: curModify.logo }]
+                    : undefined,
+                }
+              : undefined
+          }
         >
           <Form.Item label="主网名" name="chainName" rules={[{ required: true, whitespace: true }]}>
             <Input />
@@ -120,7 +130,7 @@ function ChainMGMT(props) {
             getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
             valuePropName="fileList"
           >
-            <Upload name="logo" action="/upload.do" listType="picture" maxCount={1}>
+            <Upload name="logo" customRequest={handleFileUpload} listType="picture" maxCount={1}>
               <Button icon={<UploadOutlined />}>点击上传</Button>
             </Upload>
           </Form.Item>
@@ -143,3 +153,15 @@ function ChainMGMT(props) {
 }
 
 export default React.memo(ChainMGMT)
+
+export async function handleFileUpload({ file, onError, onSuccess }) {
+  const formData = new FormData()
+  formData.append('file', file)
+
+  try {
+    const res = await uploadFile(formData)
+    onSuccess(res, file)
+  } catch (err) {
+    onError('上传出错，请重新尝试')
+  }
+}

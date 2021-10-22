@@ -5,7 +5,7 @@ import { Button, Modal, Space, Table, Popconfirm, Row } from 'antd'
 
 import CoinForm from '@/components/coin-form'
 
-import { chainTypeMap, coinStatusList, coinStatusMap } from '@/consts'
+import { coinStatusList, coinStatusMap } from '@/consts'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import ChainMGMT from '@/components/chain-mgmt'
 import { addCoin, updateCoin, fetchCoinList, updateCoinStatus, deleteCoin } from '@/pages/coin/xhr'
@@ -192,7 +192,7 @@ const CoinMGMT = () => {
       ellipsis: true,
       filteredValue: filteredChainType?.split(',') || null,
       filters: coinChainList?.map((item) => ({ text: item.chainName, value: item.id })) || [],
-      render: (t) => chainTypeMap[t]?.text,
+      render: (t) => coinChainList?.find((item) => +item.id === +t)?.chainName,
     },
     {
       title: '投票数',

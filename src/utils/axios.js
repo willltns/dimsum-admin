@@ -4,7 +4,7 @@ import { message } from 'antd'
 
 import rootStore from '@/stores'
 
-// axios.defaults.baseURL = '/api-v1'
+axios.defaults.baseURL = '/api-mgmt'
 
 axios.defaults.timeout = 60000
 

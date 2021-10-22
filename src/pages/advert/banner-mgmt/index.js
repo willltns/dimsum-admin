@@ -8,6 +8,7 @@ import { UploadOutlined } from '@ant-design/icons'
 import { adStatusList, adStatusMap, advertTypeList, advertTypeMap } from '@/consts'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { fetchBannerList, addBanner, updateBanner, updateBannerStatus } from '@/pages/advert/xhr'
+import { handleFileUpload } from '@/components/chain-mgmt'
 
 const BannerMGMT = () => {
   const [state, setState] = useState({
@@ -94,9 +95,7 @@ const BannerMGMT = () => {
 
       params.shelfTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')
       params.offShelfTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
-
-      const { response } = bannerUrl[0]
-      params.bannerUrl = 'response' // TODO
+      params.bannerUrl = bannerUrl?.[0]?.response
 
       curModify?.id && (params.id = curModify.id)
       curModify?.id ? await updateBanner(params) : await addBanner(params)
@@ -150,7 +149,7 @@ const BannerMGMT = () => {
   const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value, current: 1 }))
 
   const columns = [
-    //{ title: 'id', dataIndex: 'id', fixed: 'left', width: 80 },
+    //{ title: 'ID', dataIndex: 'id', fixed: 'left', width: 80 },
     {
       title: '代币名称',
       dataIndex: 'coinName',
@@ -158,7 +157,7 @@ const BannerMGMT = () => {
       width: 150,
       ...getColumnSearchProps('代币名称', 'coinName', handleInputSearch, coinName),
     },
-    { title: '横幅链接', dataIndex: 'bannerUrl', width: 200 },
+    { title: '横幅链接', dataIndex: 'bannerUrl', width: 200, ellipsis: true },
     { title: '跳转链接', dataIndex: 'linkUrl', width: 200 },
     {
       title: '横幅类型',
@@ -226,7 +225,10 @@ const BannerMGMT = () => {
               setState((state) => ({ ...state, modalVisible: true, curModify: r }))
               const fields = { ...r }
               fields.timeRange = [moment(r.shelfTime), moment(r.offShelfTime)]
-              fields.bannerUrl = [r.bannerUrl]
+              fields.bannerUrl = [
+                { uid: '001', status: 'done', name: fields.coinName + ' - icon', response: fields.bannerUrl },
+              ]
+
               setTimeout(() => form.setFieldsValue({ ...fields }))
             }}
           >
@@ -310,7 +312,7 @@ const BannerMGMT = () => {
             getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
             rules={[{ required: true, message: '请上传横幅图片' }]}
           >
-            <Upload name="banner" action="/upload.do" listType="picture" maxCount={1}>
+            <Upload name="banner" customRequest={handleFileUpload} listType="picture" maxCount={1}>
               <Button icon={<UploadOutlined />}>点击上传</Button>
             </Upload>
           </Form.Item>

@@ -105,7 +105,7 @@ const MiUser = () => {
   const handleInputSearch = (key, value) => setState((state) => ({ ...state, [key]: value, current: 1 }))
 
   const columns = [
-    { title: 'id', dataIndex: 'id', fixed: 'left', width: 80 },
+    { title: 'ID', dataIndex: 'id', fixed: 'left', width: 80 },
     {
       title: '用户',
       dataIndex: 'name',
