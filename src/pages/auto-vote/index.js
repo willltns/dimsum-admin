@@ -265,7 +265,7 @@ const AutoVote = () => {
       >
         <Form
           form={form}
-          labelCol={{ span: 5 }}
+          labelCol={{ span: 7 }}
           wrapperCol={{ span: 17 }}
           onValuesChange={(changedValues) => {
             if (Object.keys(changedValues || {})?.[0] !== 'coinId') return
@@ -281,7 +281,7 @@ const AutoVote = () => {
           </Form.Item>
 
           <Form.Item noStyle>
-            <Col offset={5} style={{ marginBottom: 24 }}>
+            <Col offset={7} style={{ marginBottom: 24 }}>
               <span>
                 当前总投票数: <b>{curCoinVoteStat.coinUpvotes || '--'}</b>
               </span>
@@ -290,9 +290,6 @@ const AutoVote = () => {
                 今日投票数: <b>{curCoinVoteStat.coinUpvotesToday || '--'}</b>
               </span>
             </Col>
-          </Form.Item>
-          <Form.Item label="添加投票数" name="votes" rules={[{ required: true }]}>
-            <InputNumber min={1} style={{ width: '100%' }} placeholder="输入正整数" />
           </Form.Item>
           <Form.Item label="投票时间段" name="timeRange" rules={[{ required: true }]}>
             <DatePicker.RangePicker
@@ -303,6 +300,18 @@ const AutoVote = () => {
                 defaultValue: [moment('00:00:00', 'HH:mm:ss'), moment('00:00:00', 'HH:mm:ss')],
               }}
             />
+          </Form.Item>
+          <Form.Item label="单次最小时间间隔(秒)" name="intervalTimeMin" rules={[{ required: true }]}>
+            <InputNumber min={1} style={{ width: '100%' }} placeholder="输入正整数" />
+          </Form.Item>
+          <Form.Item label="单次最大时间间隔(秒)" name="intervalTimeMax" rules={[{ required: true }]}>
+            <InputNumber min={1} style={{ width: '100%' }} placeholder="输入正整数" />
+          </Form.Item>
+          <Form.Item label="单次最小数" name="perTimeVotesMin" rules={[{ required: true }]}>
+            <InputNumber min={1} style={{ width: '100%' }} placeholder="输入正整数" />
+          </Form.Item>
+          <Form.Item label="单次最大数" name="perTimeVotesMax" rules={[{ required: true }]}>
+            <InputNumber min={1} style={{ width: '100%' }} placeholder="输入正整数" />
           </Form.Item>
 
           <Form.Item label="备注" name="remark">

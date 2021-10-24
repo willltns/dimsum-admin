@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react'
-import { Button, Form, Input, Modal, Table, Upload } from 'antd'
-import { UploadOutlined } from '@ant-design/icons'
+import React, { useState, useEffect, useCallback } from 'react'
+import { Button, Form, Input, Modal, Table } from 'antd'
 
 import { addChain, editChain, fetchChainList } from './xhr'
-import { uploadFile } from '@/assets/xhr'
+import ImgUpload, { uploadErrorValidator } from '@/components/img-upload'
+import { fileDomain } from '@/consts'
 
 function ChainMGMT(props) {
+  const { updateChainList } = props
   const [state, setState] = useState({
     modalVisible: false,
     curModify: null,
@@ -15,27 +16,29 @@ function ChainMGMT(props) {
   })
   const { modalVisible, curModify, dataSource, tableLoading, editLoading } = state
 
-  const handleChainList = () => {
+  const handleChainList = useCallback(() => {
     setState((state) => ({ ...state, tableLoading: true }))
     fetchChainList()
       .then((res) => {
-        props.updateChainList(res?.list || [])
+        updateChainList(res?.list || [])
         setState((state) => ({ ...state, tableLoading: false, dataSource: res?.list || [] }))
       })
       .catch(() => setState((state) => ({ ...state, tableLoading: false })))
-  }
+  }, [updateChainList])
 
   useEffect(() => {
     if (modalVisible) handleChainList()
-  }, [modalVisible])
+  }, [modalVisible, handleChainList])
 
   const onFormFinish = async (values) => {
     setState((state) => ({ ...state, editLoading: true }))
 
+    console.log(values, 'values')
     try {
       const params = { ...values }
       curModify?.id && (params.id = curModify.id)
-      params.logo = params.logo?.[0]?.response || ''
+      params.logo = params.logo?.[0]?.response || undefined
+      console.log(params)
       curModify?.id ? await editChain({ ...params, id: curModify.id }) : await addChain(params)
       setState((state) => ({ ...state, editLoading: false, curModify: null }))
       handleChainList()
@@ -110,7 +113,8 @@ function ChainMGMT(props) {
               ? {
                   ...curModify,
                   logo: curModify.logo
-                    ? [{ uid: '001', status: 'done', name: curModify.chainName + ' - icon', response: curModify.logo }]
+                    ? // prettier-ignore
+                      [{ response: curModify.logo, uid: '1', status: 'done', name: '', thumbUrl: fileDomain + curModify.logo }]
                     : undefined,
                 }
               : undefined
@@ -127,12 +131,11 @@ function ChainMGMT(props) {
           <Form.Item
             label="Logo"
             name="logo"
-            getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
             valuePropName="fileList"
+            getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
+            rules={[uploadErrorValidator]}
           >
-            <Upload name="logo" customRequest={handleFileUpload} listType="picture" maxCount={1}>
-              <Button icon={<UploadOutlined />}>点击上传</Button>
-            </Upload>
+            <ImgUpload />
           </Form.Item>
 
           <Form.Item label="排序值" name="sort">
@@ -153,15 +156,3 @@ function ChainMGMT(props) {
 }
 
 export default React.memo(ChainMGMT)
-
-export async function handleFileUpload({ file, onError, onSuccess }) {
-  const formData = new FormData()
-  formData.append('file', file)
-
-  try {
-    const res = await uploadFile(formData)
-    onSuccess(res, file)
-  } catch (err) {
-    onError('上传出错，请重新尝试')
-  }
-}

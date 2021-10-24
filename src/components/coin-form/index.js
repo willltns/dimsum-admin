@@ -1,14 +1,13 @@
 import ss from './index.module.less'
 
 import React, { useRef, useState, useEffect } from 'react'
-import { Form, Input, Upload, Button, Row, Col, Select, Modal } from 'antd'
-import { UploadOutlined } from '@ant-design/icons'
+import { Form, Input, Button, Row, Col, Select, Modal } from 'antd'
 
 import zh from './lang/zh.json'
 import en from './lang/en.json'
-import { urlReg } from '@/consts'
+import { fileDomain, urlReg } from '@/consts'
 import { descPH, presalePH, airdropPH, presaleTemplate, airdropTemplate, additionalLinkPH } from './const'
-import { handleFileUpload } from '@/components/chain-mgmt'
+import ImgUpload, { uploadErrorValidator } from '@/components/img-upload'
 
 // 是否中文
 const ifZh = (lang) => lang === 'zh'
@@ -91,7 +90,8 @@ function CoinForm(props) {
             ? {
                 ...coinInfo,
                 coinLogo: coinInfo.coinLogo
-                  ? [{ uid: '001', status: 'done', name: coinInfo.coinName + ' - icon', response: coinInfo.coinLogo }]
+                  ? // prettier-ignore
+                    [{ response: coinInfo.coinLogo, uid: '1', status: 'done', name: '', thumbUrl:  fileDomain + coinInfo.coinLogo }]
                   : undefined,
                 coinLaunchDate: coinInfo.coinLaunchDate?.slice(0, -3),
               }
@@ -114,13 +114,9 @@ function CoinForm(props) {
               name="coinLogo"
               getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
               valuePropName="fileList"
-              rules={[{ required: true }]}
+              rules={[{ required: true }, uploadErrorValidator]}
             >
-              <Upload name="logo" customRequest={handleFileUpload} listType="picture" maxCount={1}>
-                <Button ref={uploadBtnRef} icon={<UploadOutlined />} onClick={() => (uploadBtnRef.current.style = '')}>
-                  {tt.clickToUpload}
-                </Button>
-              </Upload>
+              <ImgUpload iconRef={uploadBtnRef} onClick={() => (uploadBtnRef.current.style = '')} />
             </Form.Item>
             <Form.Item label={tt.description} name="coinDescription" rules={[{ required: true, whitespace: true }]}>
               <Input.TextArea autoSize={{ minRows: 8 }} placeholder={descPH} />
@@ -180,22 +176,26 @@ function CoinForm(props) {
               <Input placeholder="https://..." />
             </Form.Item>
             {/* prettier-ignore */}
-            <Form.Item label={tt.chineseTG} name="linkChineseTg" rules={[{ whitespace: true }]} validateTrigger="onBlur">
+            <Form.Item label={tt.chineseTG} name="linkChineseTg" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
               <Input placeholder="https://..." />
             </Form.Item>
             {/* prettier-ignore */}
-            <Form.Item label={tt.englishTG} name="linkEnglishTg" rules={[{ whitespace: true }]} validateTrigger="onBlur">
+            <Form.Item label={tt.englishTG} name="linkEnglishTg" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
               <Input placeholder="https://..." />
             </Form.Item>
-            <Form.Item label={tt.twitter} name="linkTwitter" rules={[{ whitespace: true }]} validateTrigger="onBlur">
+            {/* prettier-ignore */}
+            <Form.Item label={tt.twitter} name="linkTwitter" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
               <Input placeholder="https://..." />
             </Form.Item>
-            <Form.Item label={tt.medium} name="linkMedium" rules={[{ whitespace: true }]} validateTrigger="onBlur">
+            {/* prettier-ignore */}
+            <Form.Item label={tt.medium} name="linkMedium" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
               <Input placeholder="https://..." />
             </Form.Item>
-            <Form.Item label={tt.discord} name="linkDiscord" rules={[{ whitespace: true }]} validateTrigger="onBlur">
+            {/* prettier-ignore */}
+            <Form.Item label={tt.discord} name="linkDiscord" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
               <Input placeholder="https://..." />
             </Form.Item>
+            {/* prettier-ignore */}
             <Form.Item label={tt.addLinkInfo} name="linkAdditionalInfo" rules={[{ whitespace: true }]}>
               <Input.TextArea autoSize={{ minRows: 6 }} placeholder={additionalLinkPH} />
             </Form.Item>
@@ -205,14 +205,14 @@ function CoinForm(props) {
             </Form.Item>
             <Form.Item
               label={tt.contactEmail}
-              name="contractEmail"
+              name="contactEmail"
               validateTrigger="onBlur"
               rules={[{ required: true }, { type: 'email' }]}
             >
               <Input placeholder="contact@coinmoments.com" />
             </Form.Item>
             <Form.Item label={tt.contactTelegram} name="contactTg" rules={[{ whitespace: true }]}>
-              <Input />
+              <Input placeholder="@yydscoins" />
             </Form.Item>
 
             <Form.Item label="备注" name="remark">

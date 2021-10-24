@@ -97,7 +97,7 @@ const PromoCoinMGMT = () => {
       const values = await form.validateFields()
       const { timeRange, ...params } = values
 
-      !curModify?.id && (params.promoted = 1)
+      params.promoted = true
       curModify?.id && (params.id = curModify.id)
       params.promotedShelfTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')
       params.promotedOffShelfTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
@@ -114,7 +114,7 @@ const PromoCoinMGMT = () => {
     setState((state) => ({ ...state, editLoading: true }))
 
     try {
-      await updateCoin({ id, promotedStatus })
+      await updateCoin({ id, promotedStatus, promoted: true })
       setState((state) => ({ ...state, editLoading: false }))
       handlePromoCoinList()
     } catch (err) {
@@ -307,7 +307,7 @@ const PromoCoinMGMT = () => {
       >
         <Form form={form} labelCol={{ span: 5 }} wrapperCol={{ span: 17 }}>
           <Form.Item label="代币" name="id" rules={[{ required: true }]}>
-            <XhrCoinSelect disabled={!!curModify?.id} />
+            <XhrCoinSelect promo disabled={!!curModify?.id} />
           </Form.Item>
 
           <Form.Item label="上架时间段" name="timeRange" rules={[{ required: true }]}>

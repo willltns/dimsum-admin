@@ -209,21 +209,12 @@ const VotePromo = () => {
               激活
             </Button>
           </Popconfirm>
-          {/*<Popconfirm
-            title={`完成 id 为 ${r.id} 的投票 ？`}
-            disabled={+r.status !== 30 || editLoading}
-            onConfirm={() => handleUpdateStatus(r.id, 40)}
-          >
-            <Button type="link" size="small" disabled={+r.status !== 30 || editLoading}>
-              完成
-            </Button>
-          </Popconfirm>*/}
           <Popconfirm
             title={`取消 id 为 ${r.id} 的投票 ？`}
-            disabled={+r.status === 50 || editLoading}
-            onConfirm={() => handleUpdateStatus(r.id, 50)}
+            disabled={+r.status === 30 || editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, 30)}
           >
-            <Button type="text" size="small" disabled={+r.status === 50 || editLoading}>
+            <Button type="text" size="small" disabled={+r.status === 30 || editLoading}>
               取消
             </Button>
           </Popconfirm>
@@ -402,7 +393,7 @@ const VotePromo = () => {
             </p>
             <div>
               <span>
-                百分比: <b>{item.percentage}</b> {/* TODO */}
+                百分比: <b>{(item.percentage * 100).toFixed(0)} %</b>
               </span>
               <span>
                 投票数: <b>{item.upvotes}</b>

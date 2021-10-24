@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import moment from 'moment'
-import { Button, DatePicker, Form, Input, Modal, Select, Table, Upload, Space, Popconfirm } from 'antd'
-import { UploadOutlined } from '@ant-design/icons'
+import { Button, DatePicker, Form, Input, Modal, Select, Table, Space, Popconfirm } from 'antd'
 
-import { adStatusList, adStatusMap, advertTypeList, advertTypeMap } from '@/consts'
+import { adStatusList, adStatusMap, advertTypeList, advertTypeMap, fileDomain } from '@/consts'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { fetchBannerList, addBanner, updateBanner, updateBannerStatus } from '@/pages/advert/xhr'
-import { handleFileUpload } from '@/components/chain-mgmt'
+
+import ImgUpload, { uploadErrorValidator } from '@/components/img-upload'
 
 const BannerMGMT = () => {
   const [state, setState] = useState({
@@ -225,9 +225,8 @@ const BannerMGMT = () => {
               setState((state) => ({ ...state, modalVisible: true, curModify: r }))
               const fields = { ...r }
               fields.timeRange = [moment(r.shelfTime), moment(r.offShelfTime)]
-              fields.bannerUrl = [
-                { uid: '001', status: 'done', name: fields.coinName + ' - icon', response: fields.bannerUrl },
-              ]
+              // prettier-ignore
+              fields.bannerUrl = [{ response: fields.bannerUrl, uid: '1', status: 'done', name: '', thumbUrl: fileDomain + fields.bannerUrl },]
 
               setTimeout(() => form.setFieldsValue({ ...fields }))
             }}
@@ -310,11 +309,9 @@ const BannerMGMT = () => {
             name="bannerUrl"
             valuePropName="fileList"
             getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
-            rules={[{ required: true, message: '请上传横幅图片' }]}
+            rules={[{ required: true, message: '请上传横幅图片' }, uploadErrorValidator]}
           >
-            <Upload name="banner" customRequest={handleFileUpload} listType="picture" maxCount={1}>
-              <Button icon={<UploadOutlined />}>点击上传</Button>
-            </Upload>
+            <ImgUpload />
           </Form.Item>
           <Form.Item label="链接" name="linkUrl" rules={[{ required: true }]}>
             <Input placeholder="点击广告 banner 时的跳转链接" />
