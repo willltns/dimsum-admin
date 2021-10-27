@@ -136,7 +136,7 @@ function CoinForm(props) {
             <Form.Item label={tt.chain} name="coinChain" rules={[{ required: true }]}>
               <Select placeholder="Select..." getPopupContainer={(tri) => tri.parentNode}>
                 {coinChainList.map(({ chainName, id }) => (
-                  <Select.Option value={id} key={id}>
+                  <Select.Option value={id + ''} key={id}>
                     {chainName}
                   </Select.Option>
                 ))}
@@ -209,7 +209,7 @@ function CoinForm(props) {
               validateTrigger="onBlur"
               rules={[{ required: true }, { type: 'email' }]}
             >
-              <Input placeholder="contact@coinmoments.com" />
+              <Input placeholder="contact@yydscoins.com" />
             </Form.Item>
             <Form.Item label={tt.contactTelegram} name="contactTg" rules={[{ whitespace: true }]}>
               <Input placeholder="@yydscoins" />

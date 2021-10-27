@@ -33,12 +33,10 @@ function ChainMGMT(props) {
   const onFormFinish = async (values) => {
     setState((state) => ({ ...state, editLoading: true }))
 
-    console.log(values, 'values')
     try {
       const params = { ...values }
       curModify?.id && (params.id = curModify.id)
       params.logo = params.logo?.[0]?.response || undefined
-      console.log(params)
       curModify?.id ? await editChain({ ...params, id: curModify.id }) : await addChain(params)
       setState((state) => ({ ...state, editLoading: false, curModify: null }))
       handleChainList()

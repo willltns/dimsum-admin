@@ -9,7 +9,7 @@ import { addUser, fetchUserList, updateUser, updateUserStatus } from '@/pages/mi
 
 const MiUser = () => {
   const [state, setState] = useState({
-    total: 50,
+    total: 0,
     current: 1,
     pageSize: 10,
     dataSource: [],

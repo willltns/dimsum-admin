@@ -13,6 +13,9 @@ import RouteWithSubRoutes from '../route-with-sub-routes'
 import Header from '@/components/header'
 import Sidebar from '@/components/siderbar'
 import LoginModal from '@/components/login-modal'
+import { getServerTime } from '@/assets/xhr'
+
+// rootStore.common.getUserinfo()
 
 message.config({ top: 52, duration: 2, maxCount: 1 })
 
@@ -25,7 +28,7 @@ function App() {
 
           <Observer
             render={() =>
-              rootStore.common.userinfo === undefined ? (
+              !rootStore.common.userinfo ? (
                 <div className={ss.main}>
                   <Sidebar />
                   <RouteWithSubRoutes routes={routes} />
@@ -34,7 +37,7 @@ function App() {
             }
           />
 
-          <LoginModal />
+          {/*<LoginModal />*/}
         </ConfigProvider>
       </BrowserRouter>
     </MobXProviderContext.Provider>
@@ -42,3 +45,19 @@ function App() {
 }
 
 export default App
+
+window.addEventListener(
+  'beforeunload',
+  () => {
+    rootStore.common.intervalTimer && clearInterval(rootStore.common.intervalTimer)
+    return null
+  },
+  false
+)
+
+document.addEventListener('visibilitychange', function () {
+  // 用户回到页面
+  if (document.visibilityState !== 'visible') return
+  // prettier-ignore
+  getServerTime().then(res => rootStore.common.updateUnixTS(res?.date)).catch(()=> {})
+})

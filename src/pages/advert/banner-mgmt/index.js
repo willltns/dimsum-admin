@@ -12,7 +12,7 @@ import ImgUpload, { uploadErrorValidator } from '@/components/img-upload'
 
 const BannerMGMT = () => {
   const [state, setState] = useState({
-    total: 50,
+    total: 0,
     current: 1,
     pageSize: 10,
     dataSource: [],
@@ -132,8 +132,6 @@ const BannerMGMT = () => {
     const { current, pageSize } = pagination
     const { type, status } = filters
     const { field, order } = sorter
-
-    console.log(filters)
 
     setState((state) => ({
       ...state,

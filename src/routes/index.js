@@ -1,8 +1,6 @@
 import loadable from '@loadable/component'
 
-// import Spinner from '../components/spinner'
-
-const loadableWithSpinner = (comp) => loadable(comp /*{ fallback: <Spinner /> }*/)
+const loadableWithSpinner = (comp) => loadable(comp)
 
 const routes = [
   {
@@ -35,20 +33,10 @@ const routes = [
     exact: true,
     component: loadableWithSpinner(() => import("../pages/ui-user")),
   },*/
-  // {
-  //   path: "/mi-user",
-  //   exact: true,
-  //   component: loadableWithSpinner(() => import("../pages/mi-user")),
-  // },
   {
     path: '*',
     redirectTo: '/coin',
   },
-  // {
-  //   path: '/counter',
-  //   component: loadableWithSpinner(() => import('../pages/counter')),
-  // },
-  // {
 ]
 
 export default routes

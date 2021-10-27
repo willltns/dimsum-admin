@@ -23,11 +23,11 @@ function LoginModal() {
       maskStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}
     >
       <Form autoComplete="off" onFinish={login}>
-        <Form.Item label="账号" name="name" rules={[{ required: true, whitespace: true, message: '账号不得为空' }]}>
-          <Input autoFocus placeholder="请输入账号" />
+        <Form.Item label="用户" name="name" rules={[{ required: true, whitespace: true, message: '账号不得为空' }]}>
+          <Input autoFocus placeholder="请输入用户名" />
         </Form.Item>
-        <Form.Item label="密码" name="psw" rules={[{ required: true, whitespace: true, message: '密码不得为空' }]}>
-          <Input placeholder="请输入密码" />
+        <Form.Item label="密码" name="password" rules={[{ required: true, whitespace: true, message: '密码不得为空' }]}>
+          <Input.Password placeholder="请输入密码" />
         </Form.Item>
 
         <Form.Item noStyle>

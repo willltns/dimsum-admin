@@ -13,7 +13,7 @@ import { addVotePromo, fetchVotePromoDetail, fetchVotePromoList, updateVotePromo
 
 const VotePromo = () => {
   const [state, setState] = useState({
-    total: 50,
+    total: 0,
     current: 1,
     pageSize: 10,
     dataSource: [],

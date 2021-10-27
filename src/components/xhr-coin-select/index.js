@@ -5,10 +5,10 @@ import { debounce } from 'lodash'
 import { fetchCoinByINS } from '@/assets/xhr'
 
 function XhrCoinSelect(props) {
-  const { promo, ...restProps } = props
+  const { promo, onSelect, ...restProps } = props
 
   const [state, setState] = React.useState({ list: [], loading: false })
-  const [list, loading] = state
+  const { list, loading } = state
 
   const handleSearch = debounce(
     (value) => {
@@ -32,8 +32,9 @@ function XhrCoinSelect(props) {
       showSearch
       loading={loading}
       filterOption={false}
-      placeholder="输入代币 ID、名称或符号查找"
       onSearch={handleSearch}
+      placeholder="输入代币 ID、名称或符号查找"
+      onSelect={(coinId) => onSelect(coinId, list)}
       {...restProps}
     >
       {list?.map((item) => (
@@ -45,4 +46,4 @@ function XhrCoinSelect(props) {
   )
 }
 
-export default XhrCoinSelect
+export default React.memo(XhrCoinSelect)

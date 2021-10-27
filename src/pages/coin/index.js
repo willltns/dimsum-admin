@@ -13,7 +13,7 @@ import { fetchChainList } from '@/components/chain-mgmt/xhr'
 
 const CoinMGMT = () => {
   const [state, setState] = React.useState({
-    total: 50,
+    total: 0,
     current: 1,
     pageSize: 10,
     dataSource: [],
@@ -165,11 +165,11 @@ const CoinMGMT = () => {
 
   const columns = [
     {
-      title: '代币Id',
+      title: '代币 ID',
       dataIndex: 'id',
       fixed: 'left',
       width: 80,
-      ...getColumnSearchProps('代币 id', 'id', handleInputSearch, id),
+      ...getColumnSearchProps('代币 ID', 'id', handleInputSearch, id),
     },
     {
       title: '代币名称',
@@ -274,7 +274,7 @@ const CoinMGMT = () => {
             size="small"
             onClick={() => setState((state) => ({ ...state, modalVisible: true, curModify: r }))}
           >
-            修改
+            {+r.coinStatus === 10 ? '审核' : '修改'}
           </Button>
 
           <Popconfirm
