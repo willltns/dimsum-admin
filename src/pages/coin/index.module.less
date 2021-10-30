@@ -28,3 +28,24 @@
     margin-right: 12px;
   }
 }
+
+.uniqueUrlCol {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  > span {
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  > i {
+    font-style: normal;
+    text-decoration: underline;
+    color: @primary-color;
+    cursor: pointer;
+    user-select: none;
+  }
+}

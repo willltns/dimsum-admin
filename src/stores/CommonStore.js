@@ -28,7 +28,7 @@ export class CommonStore {
         const userinfo = yield getUserinfo()
         this.updateUserinfo(userinfo)
       } catch (err) {
-        this.updateUserinfo(null)
+        // this.updateUserinfo(null)
       }
     }.bind(this)
   )

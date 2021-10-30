@@ -3,12 +3,13 @@
 import React, { useEffect, useCallback } from 'react'
 import { Button, Modal, Space, Table, Popconfirm, Row } from 'antd'
 
-import CoinForm from '@/components/coin-form'
-
+import { addCoin, updateCoin, fetchCoinList, updateCoinStatus, deleteCoin } from '@/pages/coin/xhr'
 import { coinStatusList, coinStatusMap } from '@/consts'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
+
+import UniqueUrlCol from './UniqueUrlCol'
+import CoinForm from '@/components/coin-form'
 import ChainMGMT from '@/components/chain-mgmt'
-import { addCoin, updateCoin, fetchCoinList, updateCoinStatus, deleteCoin } from '@/pages/coin/xhr'
 import { fetchChainList } from '@/components/chain-mgmt/xhr'
 
 const CoinMGMT = () => {
@@ -25,6 +26,7 @@ const CoinMGMT = () => {
     id: '',
     coinName: '',
     coinSymbol: '',
+    coinUniqueUrl: '',
     contactEmail: '',
     contactTg: '',
     remark: '',
@@ -47,6 +49,7 @@ const CoinMGMT = () => {
     id,
     coinName,
     coinSymbol,
+    coinUniqueUrl,
     contactEmail,
     contactTg,
     remark,
@@ -78,6 +81,7 @@ const CoinMGMT = () => {
       id,
       coinName,
       coinSymbol,
+      coinUniqueUrl,
       contactEmail,
       contactTg,
       remark,
@@ -207,6 +211,13 @@ const CoinMGMT = () => {
       width: 100,
       sorter: true,
       sortOrder: sortedField === 'coinUpvotesToday' ? sortedOrder : false,
+    },
+    {
+      title: 'Unique Url',
+      dataIndex: 'coinUniqueUrl',
+      width: 120,
+      ...getColumnSearchProps('唯一 Url', 'coinUniqueUrl', handleInputSearch, contactEmail),
+      render: (_, r) => <UniqueUrlCol record={r} afterEdit={handleCoinList} />,
     },
     {
       title: '推广',

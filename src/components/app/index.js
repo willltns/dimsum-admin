@@ -15,7 +15,7 @@ import Sidebar from '@/components/siderbar'
 import LoginModal from '@/components/login-modal'
 import { getServerTime } from '@/assets/xhr'
 
-// rootStore.common.getUserinfo()
+rootStore.common.getUserinfo()
 
 message.config({ top: 52, duration: 2, maxCount: 1 })
 
@@ -28,7 +28,7 @@ function App() {
 
           <Observer
             render={() =>
-              !rootStore.common.userinfo ? (
+              rootStore.common.userinfo !== null ? (
                 <div className={ss.main}>
                   <Sidebar />
                   <RouteWithSubRoutes routes={routes} />
@@ -37,7 +37,7 @@ function App() {
             }
           />
 
-          {/*<LoginModal />*/}
+          <LoginModal />
         </ConfigProvider>
       </BrowserRouter>
     </MobXProviderContext.Provider>
