@@ -6,7 +6,7 @@ import { UploadOutlined } from '@ant-design/icons'
 import { uploadFile } from '@/assets/xhr'
 import { fileDomain } from '@/consts'
 
-const acceptList = ['.png', '.jpg', '.jpeg', '.gif', '.webp']
+const acceptList = ['.png', '.jpg', '.jpeg', '.webp', '.gif']
 
 export async function handleFileUpload({ file, onError, onSuccess }) {
   const formData = new FormData()
@@ -30,26 +30,26 @@ const onPreview = ({ response }) =>
     content: <img src={fileDomain + response} alt="logo" />,
   })
 
-const beforeUpload = (file, fileList) => {
-  if (fileList.length > 1) {
-    message.warn('Please select only one file.')
-    return Upload.LIST_IGNORE
+function ImgUpload({ value, onChange, fileMaxSize = 0.1, iconRef, onClick, ...restProps }) {
+  const beforeUpload = (file, fileList) => {
+    if (fileList.length > 1) {
+      message.warn('Please select only one file.')
+      return Upload.LIST_IGNORE
+    }
+
+    if (!acceptList.some((type) => file.type.includes(type.slice(1)))) {
+      message.warn(`Image extension error, only support ${acceptList.join(' / ')}`)
+      return Upload.LIST_IGNORE
+    }
+
+    if (file.size / 1024 / 1024 > fileMaxSize) {
+      message.warn(`Image size should be less than ${fileMaxSize} MB.`)
+      return Upload.LIST_IGNORE
+    }
+
+    return true
   }
 
-  if (!acceptList.some((type) => file.type.includes(type.slice(1)))) {
-    message.warn(`Image extension error, only support ${acceptList.join(' / ')}`)
-    return Upload.LIST_IGNORE
-  }
-
-  if (file.size / 1024 / 1024 > 0.1) {
-    message.warn('Image size should be less than 0.1 MB.')
-    return Upload.LIST_IGNORE
-  }
-
-  return true
-}
-
-function ImgUpload({ value, onChange, iconRef, onClick, ...restProps }) {
   return (
     <Upload
       name="logo"
@@ -74,7 +74,7 @@ export default ImgUpload
 //
 export const uploadErrorValidator = {
   validator: (rule, value) =>
-    value?.[0]?.status === undefined || value?.[0]?.status === 'done'
+    value?.[0]?.status === undefined || value?.[0]?.status === 'done' || value?.[0]?.status === 'uploading'
       ? Promise.resolve()
       : Promise.reject('上传出错，请删除或重新上传'),
 }

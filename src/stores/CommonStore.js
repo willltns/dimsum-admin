@@ -28,7 +28,7 @@ export class CommonStore {
         const userinfo = yield getUserinfo()
         this.updateUserinfo(userinfo)
       } catch (err) {
-        // this.updateUserinfo(null)
+        this.updateUserinfo(null)
       }
     }.bind(this)
   )
@@ -38,6 +38,7 @@ export class CommonStore {
       this.loading = true
       try {
         const userinfo = yield login(params)
+        localStorage.setItem('token', userinfo.token)
         this.updateUserinfo(userinfo)
       } catch (err) {}
       this.loading = false

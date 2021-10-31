@@ -2,12 +2,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { Button, DatePicker, Form, Input, Modal, Table, Space, Popconfirm } from 'antd'
-import { promoCoinStatusList, promoCoinStatusMap } from '@/consts'
 import moment from 'moment'
+import { Observer } from 'mobx-react'
 
+import { promoCoinStatusList, promoCoinStatusMap } from '@/consts'
 import { updateCoin } from '@/pages/coin/xhr'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { fetchPromoCoinList } from '@/pages/advert/xhr'
+import { useStore } from '@/utils/hooks/useStore'
 
 import XhrCoinSelect from '@/components/xhr-coin-select'
 
@@ -49,6 +51,8 @@ const PromoCoinMGMT = () => {
     tableLoading,
     editLoading,
   } = state
+
+  const { common } = useStore()
 
   const handlePromoCoinList = useCallback(() => {
     setState((state) => ({ ...state, tableLoading: true }))
@@ -172,19 +176,28 @@ const PromoCoinMGMT = () => {
       ...getColumnSearchProps('代币符号', 'coinSymbol', handleInputSearch, coinSymbol),
     },
     {
-      title: '状态',
-      dataIndex: 'promotedStatus',
-      width: 88,
-      filteredValue: filteredStatus?.split(',') || null,
-      filters: promoCoinStatusList,
-      render: (t) => promoCoinStatusMap[t]?.text,
-    },
-    {
       title: '上架时间',
       dataIndex: 'promotedShelfTime',
       width: 170,
       sorter: true,
       sortOrder: sortedField === 'promotedShelfTime' ? sortedOrder : false,
+      render: (t, r) => (
+        <Observer
+          render={() => (
+            <div
+              style={
+                +r.promotedStatus === 10 &&
+                moment(r.promotedShelfTime, 'YYYY-MM-DD HH:mm:ss').unix() <= common.unixTS &&
+                moment(r.promotedOffShelfTime, 'YYYY-MM-DD HH:mm:ss').unix() >= common.unixTS
+                  ? { color: '#00d62f', fontWeight: 500 }
+                  : undefined
+              }
+            >
+              {t}
+            </div>
+          )}
+        />
+      ),
     },
     {
       title: '下架时间',
@@ -192,6 +205,30 @@ const PromoCoinMGMT = () => {
       width: 170,
       sorter: true,
       sortOrder: sortedField === 'promotedOffShelfTime' ? sortedOrder : false,
+      render: (t, r) => (
+        <Observer
+          render={() => (
+            <div
+              style={
+                +r.promotedStatus === 20 &&
+                moment(r.promotedOffShelfTime, 'YYYY-MM-DD HH:mm:ss').unix() <= common.unixTS
+                  ? { color: 'red', fontWeight: 500 }
+                  : undefined
+              }
+            >
+              {t}
+            </div>
+          )}
+        />
+      ),
+    },
+    {
+      title: '状态',
+      dataIndex: 'promotedStatus',
+      width: 88,
+      filteredValue: filteredStatus?.split(',') || null,
+      filters: promoCoinStatusList,
+      render: (t) => promoCoinStatusMap[t]?.text,
     },
     {
       title: '投票数',

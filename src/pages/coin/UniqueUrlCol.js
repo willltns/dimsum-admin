@@ -1,7 +1,7 @@
 import ss from './index.module.less'
 
 import React, { useState } from 'react'
-import { Input, Modal, Tooltip } from 'antd'
+import { Input, message, Modal, Tooltip } from 'antd'
 import { updateCoin } from '@/pages/coin/xhr'
 
 function UniqueUrlCol(props) {
@@ -10,8 +10,12 @@ function UniqueUrlCol(props) {
   const { visible, uniqueVal, loading } = state
 
   const handleOk = async () => {
-    setState((state) => ({ ...state, loading: true }))
+    if (/^[1-9]\d*$/.test(uniqueVal)) {
+      message.warn('不能使用全数字作为 Unique Url')
+      return
+    }
 
+    setState((state) => ({ ...state, loading: true }))
     try {
       await updateCoin({ id: record.id, coinUniqueUrl: uniqueVal })
       setState((state) => ({ ...state, visible: false, loading: false }))
@@ -31,8 +35,9 @@ function UniqueUrlCol(props) {
       </div>
 
       <Modal
+        width={500}
         visible={visible}
-        title="编辑 URL"
+        title="编辑 Unique Url"
         onOk={handleOk}
         destroyOnClose
         closable={!loading}
@@ -42,6 +47,7 @@ function UniqueUrlCol(props) {
         onCancel={() => setState((state) => ({ ...state, visible: false }))}
         afterClose={() => setState({ uniqueVal: '' })}
       >
+        <h4 style={{ marginBottom: 24 }}>当前编辑代币：{`${record.coinName} (${record.coinSymbol}) ${record.id}`}</h4>
         <Input
           autoFocus
           value={uniqueVal}

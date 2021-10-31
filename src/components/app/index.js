@@ -28,12 +28,12 @@ function App() {
 
           <Observer
             render={() =>
-              rootStore.common.userinfo !== null ? (
+              !!rootStore.common.userinfo && (
                 <div className={ss.main}>
                   <Sidebar />
                   <RouteWithSubRoutes routes={routes} />
                 </div>
-              ) : null
+              )
             }
           />
 

@@ -103,6 +103,7 @@ const CoinMGMT = () => {
     id,
     coinName,
     coinSymbol,
+    coinUniqueUrl,
     contactEmail,
     contactTg,
     remark,
@@ -216,7 +217,7 @@ const CoinMGMT = () => {
       title: 'Unique Url',
       dataIndex: 'coinUniqueUrl',
       width: 120,
-      ...getColumnSearchProps('唯一 Url', 'coinUniqueUrl', handleInputSearch, contactEmail),
+      ...getColumnSearchProps('Unique Url', 'coinUniqueUrl', handleInputSearch, contactEmail),
       render: (_, r) => <UniqueUrlCol record={r} afterEdit={handleCoinList} />,
     },
     {
@@ -230,6 +231,20 @@ const CoinMGMT = () => {
         { text: '否', value: 0 },
       ],
       render: (t) => (+t === 1 ? '是' : '否'),
+    },
+    {
+      title: '预售开始时间',
+      dataIndex: 'coinPresaleDate',
+      width: 170,
+      sorter: true,
+      sortOrder: sortedField === 'coinPresaleDate' ? sortedOrder : false,
+    },
+    {
+      title: '空投参与时间',
+      dataIndex: 'coinAirdropDate',
+      width: 170,
+      sorter: true,
+      sortOrder: sortedField === 'coinAirdropDate' ? sortedOrder : false,
     },
     {
       title: '上市时间',

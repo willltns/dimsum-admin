@@ -112,11 +112,19 @@
   flex-direction: column;
   align-items: flex-start;
 
-  & > button {
-    width: 200px;
+  > div {
+    width: 100%;
 
-    &:first-of-type {
-      margin-bottom: 24px;
+    &:first-child {
+      margin-bottom: 16px;
+    }
+
+    & > button {
+      width: 200px;
+
+      &:first-child {
+        margin-bottom: 8px;
+      }
     }
   }
 }

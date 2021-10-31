@@ -229,22 +229,24 @@ const AutoVote = () => {
         )
       },
     },
-    {
-      title: '状态',
-      width: 88,
-      dataIndex: 'status',
-      filteredValue: filteredStatus?.split(',') || null,
-      filters: autoVoteStatusList,
-      render: (t) => autoVoteStatusMap[t]?.text,
-    },
-    { title: '已添加票数', dataIndex: 'votedNum', width: 120 },
+
+    { title: '已添加票数', dataIndex: 'votedVotes', width: 120 },
     { title: '总投票数', dataIndex: 'coinUpvotes', width: 120 },
     { title: '今日投票数', dataIndex: 'coinUpvotesToday', width: 120 },
     {
       title: '备注',
-      width: 200,
       dataIndex: 'remark',
+      width: 200,
       ...getColumnSearchProps('备注', 'remark', handleInputSearch, remark),
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 88,
+      fixed: 'right',
+      filteredValue: filteredStatus?.split(',') || null,
+      filters: autoVoteStatusList,
+      render: (t) => autoVoteStatusMap[t]?.text,
     },
     {
       title: '操作',

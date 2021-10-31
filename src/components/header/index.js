@@ -2,7 +2,7 @@ import ss from './index.module.less'
 
 import React, { useEffect } from 'react'
 import { observer } from 'mobx-react'
-import { Dropdown, Button } from 'antd'
+import { Dropdown } from 'antd'
 import moment from 'moment'
 import { Link, useLocation } from 'react-router-dom'
 
@@ -23,7 +23,10 @@ function Header() {
 
   const onLogout = () =>
     logout()
-      .then(() => common.updateUserinfo(null))
+      .then(() => {
+        common.updateUserinfo(null)
+        localStorage.removeItem('token')
+      })
       .catch(() => {})
 
   return (
@@ -46,23 +49,17 @@ function Header() {
       )}
 
       <div className={ss.user}>
-        {common.userinfo ? (
-          <Dropdown
-            arrow
-            placement="bottomCenter"
-            overlay={
-              <div className={ss.logoutBtn} onClick={onLogout}>
-                退出登录
-              </div>
-            }
-          >
-            <i className={ss.charAvatar}>{common.userinfo.name?.[0] || '?'}</i>
-          </Dropdown>
-        ) : (
-          <Button type="link" onClick={() => common.updateUserinfo(null)}>
-            登录
-          </Button>
-        )}
+        <Dropdown
+          arrow
+          placement="bottomCenter"
+          overlay={
+            <div className={ss.logoutBtn} onClick={onLogout}>
+              退出登录
+            </div>
+          }
+        >
+          <i className={ss.charAvatar}>{common.userinfo?.name?.[0] || '?'}</i>
+        </Dropdown>
       </div>
     </header>
   )

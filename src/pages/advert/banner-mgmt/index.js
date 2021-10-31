@@ -9,6 +9,8 @@ import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { fetchBannerList, addBanner, updateBanner, updateBannerStatus } from '@/pages/advert/xhr'
 
 import ImgUpload, { uploadErrorValidator } from '@/components/img-upload'
+import { Observer } from 'mobx-react'
+import { useStore } from '@/utils/hooks/useStore'
 
 const BannerMGMT = () => {
   const [state, setState] = useState({
@@ -47,6 +49,8 @@ const BannerMGMT = () => {
     tableLoading,
     editLoading,
   } = state
+
+  const { common } = useStore()
 
   const handleBannerList = useCallback(() => {
     setState((state) => ({ ...state, tableLoading: true }))
@@ -166,19 +170,28 @@ const BannerMGMT = () => {
       render: (t) => advertTypeMap[t]?.text,
     },
     {
-      title: '状态',
-      dataIndex: 'status',
-      width: 88,
-      filteredValue: filteredStatus?.split(',') || null,
-      filters: adStatusList,
-      render: (t) => adStatusMap[t]?.text,
-    },
-    {
       title: '上架时间',
       dataIndex: 'shelfTime',
       width: 170,
       sorter: true,
       sortOrder: sortedField === 'shelfTime' ? sortedOrder : false,
+      render: (t, r) => (
+        <Observer
+          render={() => (
+            <div
+              style={
+                +r.status === 10 &&
+                moment(r.shelfTime, 'YYYY-MM-DD HH:mm:ss').unix() <= common.unixTS &&
+                moment(r.offShelfTime, 'YYYY-MM-DD HH:mm:ss').unix() >= common.unixTS
+                  ? { color: '#00d62f', fontWeight: 500 }
+                  : undefined
+              }
+            >
+              {t}
+            </div>
+          )}
+        />
+      ),
     },
     {
       title: '下架时间',
@@ -186,8 +199,30 @@ const BannerMGMT = () => {
       width: 170,
       sorter: true,
       sortOrder: sortedField === 'offShelfTime' ? sortedOrder : false,
+      render: (t, r) => (
+        <Observer
+          render={() => (
+            <div
+              style={
+                +r.status === 20 && moment(r.offShelfTime, 'YYYY-MM-DD HH:mm:ss').unix() <= common.unixTS
+                  ? { color: 'red', fontWeight: 500 }
+                  : undefined
+              }
+            >
+              {t}
+            </div>
+          )}
+        />
+      ),
     },
-
+    {
+      title: '状态',
+      dataIndex: 'status',
+      width: 88,
+      filteredValue: filteredStatus?.split(',') || null,
+      filters: adStatusList,
+      render: (t) => adStatusMap[t]?.text,
+    },
     { title: '价格', dataIndex: 'price', width: 120 },
     {
       title: '联系邮箱',
@@ -309,7 +344,7 @@ const BannerMGMT = () => {
             getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
             rules={[{ required: true, message: '请上传横幅图片' }, uploadErrorValidator]}
           >
-            <ImgUpload />
+            <ImgUpload fileMaxSize={10} />
           </Form.Item>
           <Form.Item label="链接" name="linkUrl" rules={[{ required: true }]}>
             <Input placeholder="点击广告 banner 时的跳转链接" />

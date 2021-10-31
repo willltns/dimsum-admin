@@ -15,7 +15,10 @@ axios.defaults.timeout = 60000
 // axios.defaults.transformRequest = (data, header) => qs.stringify(data)
 
 axios.interceptors.request.use(
-  (config) => config,
+  (config) => {
+    config.headers.token = localStorage.getItem('token')
+    return config
+  },
   (error) => Promise.reject(error)
 )
 

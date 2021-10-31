@@ -17,8 +17,8 @@ export const updateBannerStatus = (params) => axios.post('/advert/banner/edit/st
 
 export const fetchPromoCoinList = (params) => axios.post('/coin/list', clearFalsyFields({ ...params, promoted: 1 }))
 
-export const addPromoCoin = (params) => axios.post('/advert/promo-coin/add', params)
-
 export const updatePromoCoin = (params) => axios.post('/advert/promo-coin/edit', params)
 
 export const updatePromoCoinStatus = (params) => axios.post('/advert/promo-coin/edit/status', params)
+
+export const getSearchPromo = () => axios.post('/coin/search/promo', {})
