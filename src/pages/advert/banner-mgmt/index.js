@@ -349,7 +349,12 @@ const BannerMGMT = () => {
           <Form.Item label="链接" name="linkUrl" rules={[{ required: true }]}>
             <Input placeholder="点击广告 banner 时的跳转链接" />
           </Form.Item>
-          <Form.Item label="价格" name="price" rules={[{ required: true }]}>
+          <Form.Item
+            label="价格"
+            name="price"
+            validateTrigger="onBlur"
+            rules={[{ required: true }, { pattern: /^[0-9]+(.[0-9]{1,4})?$/, message: '请输入正确价格' }]}
+          >
             <Input />
           </Form.Item>
           <Form.Item label="上架时间段" name="timeRange" rules={[{ required: true }]}>

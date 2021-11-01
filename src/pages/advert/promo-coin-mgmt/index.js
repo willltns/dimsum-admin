@@ -358,7 +358,12 @@ const PromoCoinMGMT = () => {
             />
           </Form.Item>
 
-          <Form.Item label="价格" name="promotedPrice" rules={[{ required: true }]}>
+          <Form.Item
+            label="价格"
+            name="promotedPrice"
+            validateTrigger="onBlur"
+            rules={[{ required: true }, { pattern: /^[0-9]+(.[0-9]{1,4})?$/, message: '请输入正确价格' }]}
+          >
             <Input />
           </Form.Item>
 

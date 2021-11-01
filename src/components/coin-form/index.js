@@ -59,6 +59,8 @@ function CoinForm(props) {
 
     const params = { ...values, coinPresaleInfo, coinAirdropInfo, linkAdditionalInfo: linkAdditionalInfo?.trim() || '' }
     params.coinLogo = params.coinLogo?.[0]?.response
+    params.coinPresaleDate = params.coinPresaleDate || ''
+    params.coinAirdropDate = params.coinAirdropDate || ''
 
     onOk(params, coinInfo?.id || undefined)
   }

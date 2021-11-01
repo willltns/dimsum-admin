@@ -4,7 +4,7 @@ import { Button, Input, Popover, Space } from 'antd'
 import { addOptionVotes } from '@/pages/vote-promo/xhr'
 
 function VoteModifier(props) {
-  const { No, optionId, cbSuccess } = props
+  const { No, optionId, status, cbSuccess } = props
 
   const [state, setState] = React.useState({ visible: false, voteNum: '', loading: false })
   const { visible, voteNum, loading } = state
@@ -45,7 +45,7 @@ function VoteModifier(props) {
       <Button
         type="link"
         size="small"
-        disabled={loading}
+        disabled={loading || +status === 30}
         onClick={() => setState((state) => ({ ...state, visible: !state.visible }))}
       >
         添加投票数

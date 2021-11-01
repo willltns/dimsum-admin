@@ -131,7 +131,7 @@ function ChainMGMT(props) {
             name="logo"
             valuePropName="fileList"
             getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
-            rules={[uploadErrorValidator]}
+            rules={[{ required: true, message: '请上传主网 Logo' }, uploadErrorValidator]}
           >
             <ImgUpload />
           </Form.Item>

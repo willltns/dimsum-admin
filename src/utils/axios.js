@@ -29,7 +29,8 @@ axios.interceptors.response.use(
     if (data?.code === 200) return data.data
 
     if (data?.code === 401) rootStore.common.updateUserinfo(null)
-    if (data?.message) message.warn(data.message)
+
+    if (data?.message && data?.code !== 401) message.warn(data.message)
 
     return Promise.reject(new CodeError(data))
   },

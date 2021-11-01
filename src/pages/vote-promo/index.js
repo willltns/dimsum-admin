@@ -9,7 +9,13 @@ import moment from 'moment'
 import XhrCoinSelect from '@/components/xhr-coin-select'
 import { votePromoTypeList, votePromoStatusList, votePromoTypeMap, votePromoStatusMap } from './consts'
 import VoteModifier from '@/pages/vote-promo/VoteModifier'
-import { addVotePromo, fetchVotePromoDetail, fetchVotePromoList, updateVotePromoStatus } from '@/pages/vote-promo/xhr'
+import {
+  addVotePromo,
+  deleteVotePromo,
+  fetchVotePromoDetail,
+  fetchVotePromoList,
+  updateVotePromoStatus,
+} from '@/pages/vote-promo/xhr'
 
 const VotePromo = () => {
   const [state, setState] = useState({
@@ -97,7 +103,7 @@ const VotePromo = () => {
     setState((state) => ({ ...state, editLoading: true }))
 
     try {
-      await updateVotePromoStatus({ id, status })
+      status ? await updateVotePromoStatus({ id, status }) : await deleteVotePromo({ id })
       setState((state) => ({ ...state, editLoading: false }))
       handleVotePromoList()
     } catch (err) {
@@ -202,20 +208,20 @@ const VotePromo = () => {
           </Button>
           <Popconfirm
             title={`激活 id 为 ${r.id} 的投票 ？`}
-            disabled={+r.status !== 10 || editLoading}
+            disabled={+r.status === 20 || editLoading}
             onConfirm={() => handleUpdateStatus(r.id, 20)}
           >
-            <Button type="link" size="small" disabled={+r.status !== 10 || editLoading}>
+            <Button type="link" size="small" disabled={+r.status === 20 || editLoading}>
               激活
             </Button>
           </Popconfirm>
           <Popconfirm
             title={`取消 id 为 ${r.id} 的投票 ？`}
-            disabled={+r.status === 30 || editLoading}
-            onConfirm={() => handleUpdateStatus(r.id, 30)}
+            disabled={editLoading}
+            onConfirm={() => handleUpdateStatus(r.id, +r.status !== 30 ? 30 : undefined)}
           >
-            <Button type="text" size="small" disabled={+r.status === 30 || editLoading}>
-              取消
+            <Button type="text" size="small" disabled={editLoading}>
+              {+r.status !== 30 ? '取消' : '删除'}
             </Button>
           </Popconfirm>
         </Space>
@@ -400,6 +406,7 @@ const VotePromo = () => {
               </span>
               <VoteModifier
                 No={index + 1}
+                status={votePromoDetail?.status}
                 optionId={item.optionId}
                 cbSuccess={() => handleVotePromoDetail(votePromoDetail.id)}
               />

@@ -9,6 +9,8 @@ export const fetchVotePromoList = (params) => axios.post('/vote-promo/list', cle
 
 export const fetchVotePromoDetail = (params) => axios.post('/vote-promo/detail', params)
 
+export const deleteVotePromo = (params) => axios.post('/vote-promo/delete', params)
+
 export const addOptionVotes = (params) => axios.post('/vote-promo/edit/option-upvotes', params)
 
 export const updateVotePromoStatus = (params) => axios.post('/vote-promo/edit/status', params)

@@ -149,7 +149,7 @@ const CoinMGMT = () => {
 
   const onTableChange = (pagination, filters, sorter) => {
     const { current, pageSize } = pagination
-    const { coinChain, coinStatus } = filters
+    const { coinChain, coinStatus, promoted } = filters
     const { field, order } = sorter
 
     // TODO 排序时重置页码，新建重置？
@@ -161,6 +161,7 @@ const CoinMGMT = () => {
       pageSize,
       filteredChainType: coinChain?.join(','),
       filteredCoinStatus: coinStatus?.join(','),
+      filteredPromoted: promoted?.join(','),
       sortedOrder: order,
       sortedField: order ? field : null,
     }))
@@ -224,7 +225,7 @@ const CoinMGMT = () => {
       title: '推广',
       dataIndex: 'promoted',
       width: 66,
-      filteredValue: filteredPromoted ? [filteredPromoted] : null,
+      filteredValue: filteredPromoted?.split(',') || null,
       filterMultiple: false,
       filters: [
         { text: '是', value: 1 },
@@ -232,20 +233,20 @@ const CoinMGMT = () => {
       ],
       render: (t) => (+t === 1 ? '是' : '否'),
     },
-    {
-      title: '预售开始时间',
-      dataIndex: 'coinPresaleDate',
-      width: 170,
-      sorter: true,
-      sortOrder: sortedField === 'coinPresaleDate' ? sortedOrder : false,
-    },
-    {
-      title: '空投参与时间',
-      dataIndex: 'coinAirdropDate',
-      width: 170,
-      sorter: true,
-      sortOrder: sortedField === 'coinAirdropDate' ? sortedOrder : false,
-    },
+    // {
+    //   title: '预售开始时间',
+    //   dataIndex: 'coinPresaleDate',
+    //   width: 170,
+    //   sorter: true,
+    //   sortOrder: sortedField === 'coinPresaleDate' ? sortedOrder : false,
+    // },
+    // {
+    //   title: '空投参与时间',
+    //   dataIndex: 'coinAirdropDate',
+    //   width: 170,
+    //   sorter: true,
+    //   sortOrder: sortedField === 'coinAirdropDate' ? sortedOrder : false,
+    // },
     {
       title: '上市时间',
       dataIndex: 'shelfTime',
