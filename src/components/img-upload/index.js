@@ -20,7 +20,7 @@ export async function handleFileUpload({ file, onError, onSuccess }) {
   }
 }
 
-const onPreview = ({ response }) =>
+export const onPreview = ({ response }) =>
   Modal.info({
     icon: null,
     centered: true,

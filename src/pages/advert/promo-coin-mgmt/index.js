@@ -156,11 +156,11 @@ const PromoCoinMGMT = () => {
   const columns = [
     //{ title: 'ID', dataIndex: 'id', fixed: 'left', width: 80 },
     {
-      title: '代币 ID',
+      title: '代币ID',
       dataIndex: 'id',
       fixed: 'left',
       width: 150,
-      ...getColumnSearchProps('代币 ID', 'id', handleInputSearch, coinId),
+      ...getColumnSearchProps('代币ID', 'id', handleInputSearch, coinId),
     },
     {
       title: '代币名称',

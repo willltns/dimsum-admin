@@ -171,11 +171,11 @@ const CoinMGMT = () => {
 
   const columns = [
     {
-      title: '代币 ID',
+      title: '代币ID',
       dataIndex: 'id',
       fixed: 'left',
       width: 80,
-      ...getColumnSearchProps('代币 ID', 'id', handleInputSearch, id),
+      ...getColumnSearchProps('代币ID', 'id', handleInputSearch, id),
     },
     {
       title: '代币名称',
@@ -233,34 +233,6 @@ const CoinMGMT = () => {
       ],
       render: (t) => (+t === 1 ? '是' : '否'),
     },
-    // {
-    //   title: '预售开始时间',
-    //   dataIndex: 'coinPresaleDate',
-    //   width: 170,
-    //   sorter: true,
-    //   sortOrder: sortedField === 'coinPresaleDate' ? sortedOrder : false,
-    // },
-    // {
-    //   title: '空投参与时间',
-    //   dataIndex: 'coinAirdropDate',
-    //   width: 170,
-    //   sorter: true,
-    //   sortOrder: sortedField === 'coinAirdropDate' ? sortedOrder : false,
-    // },
-    {
-      title: '上市时间',
-      dataIndex: 'shelfTime',
-      width: 170,
-      sorter: true,
-      sortOrder: sortedField === 'shelfTime' ? sortedOrder : false,
-    },
-    {
-      title: '下市时间',
-      dataIndex: 'offShelfTime',
-      width: 170,
-      sorter: true,
-      sortOrder: sortedField === 'offShelfTime' ? sortedOrder : false,
-    },
     {
       title: '联系邮箱',
       dataIndex: 'contactEmail',
@@ -278,6 +250,27 @@ const CoinMGMT = () => {
       width: 200,
       dataIndex: 'remark',
       ...getColumnSearchProps('备注', 'remark', handleInputSearch, remark),
+    },
+    {
+      title: '上市时间',
+      dataIndex: 'shelfTime',
+      width: 170,
+      sorter: true,
+      sortOrder: sortedField === 'shelfTime' ? sortedOrder : false,
+    },
+    {
+      title: '下市时间',
+      dataIndex: 'offShelfTime',
+      width: 170,
+      sorter: true,
+      sortOrder: sortedField === 'offShelfTime' ? sortedOrder : false,
+    },
+    {
+      title: '新建时间',
+      dataIndex: 'createTime',
+      width: 170,
+      sorter: true,
+      sortOrder: sortedField === 'createTime' ? sortedOrder : false,
     },
     {
       title: '状态',

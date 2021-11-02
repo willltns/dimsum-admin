@@ -33,7 +33,7 @@ function XhrCoinSelect(props) {
       loading={loading}
       filterOption={false}
       onSearch={handleSearch}
-      placeholder="输入代币 ID、名称或符号查找"
+      placeholder="输入代币ID、名称或符号查找"
       onSelect={typeof onSelect === 'function' ? (coinId) => onSelect(coinId, list) : undefined}
       {...restProps}
     >

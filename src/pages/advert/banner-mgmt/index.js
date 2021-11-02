@@ -8,7 +8,7 @@ import { adStatusList, adStatusMap, advertTypeList, advertTypeMap, fileDomain } 
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { fetchBannerList, addBanner, updateBanner, updateBannerStatus } from '@/pages/advert/xhr'
 
-import ImgUpload, { uploadErrorValidator } from '@/components/img-upload'
+import ImgUpload, { uploadErrorValidator, onPreview } from '@/components/img-upload'
 import { Observer } from 'mobx-react'
 import { useStore } from '@/utils/hooks/useStore'
 
@@ -159,8 +159,15 @@ const BannerMGMT = () => {
       width: 150,
       ...getColumnSearchProps('代币名称', 'coinName', handleInputSearch, coinName),
     },
-    { title: '横幅链接', dataIndex: 'bannerUrl', width: 200, ellipsis: true },
-    { title: '跳转链接', dataIndex: 'linkUrl', width: 200 },
+    {
+      title: '横幅链接',
+      dataIndex: 'bannerUrl',
+      align: 'center',
+      width: 80,
+      // prettier-ignore
+      render: (t) => (<Button type="link" onClick={() => onPreview({ response: t })}>预览</Button>),
+    },
+    { title: '跳转链接', dataIndex: 'linkUrl', width: 200, ellipsis: true },
     {
       title: '横幅类型',
       dataIndex: 'type',
