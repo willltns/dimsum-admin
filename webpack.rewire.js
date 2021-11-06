@@ -45,7 +45,7 @@ module.exports = function (defaultConfig, webpackEnv) {
           patterns: [{ from: './src/assets/dll/' + dllFileName, to: './static/js' }],
         }),
 
-      new LodashModuleReplacementPlugin(),
+      isEnvProduction && new LodashModuleReplacementPlugin(),
 
       process.argv[2] === 'analyze' && new BundleAnalyzerPlugin(),
     ].filter(Boolean),
@@ -100,11 +100,11 @@ module.exports = function (defaultConfig, webpackEnv) {
     { libraryName: 'antd', libraryDirectory: 'es', style: true },
   ])
 
-  // Lodash tree shaking
-  babelOptions.plugins.push([require.resolve('babel-plugin-lodash')])
-
-  // htmlWebpackPlugin instance, adding filename as property, and trying to use it in index.html.
   if (isEnvProduction) {
+    // Lodash tree shaking
+    babelOptions.plugins.push([require.resolve('babel-plugin-lodash')])
+
+    // htmlWebpackPlugin instance, adding filename as property, and trying to use it in index.html.
     const htmlWebpackPlugin = config.plugins.find((plugin) => plugin.constructor.name === 'HtmlWebpackPlugin')
     htmlWebpackPlugin.options.dllVendor = '/static/js/' + dllFileName
   }

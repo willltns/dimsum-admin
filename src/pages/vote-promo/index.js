@@ -1,7 +1,7 @@
 import ss from './index.module.less'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { Button, Modal, Space, Table, Form, Input, Radio, DatePicker, Col, Popconfirm, Divider } from 'antd'
+import { Button, Modal, Space, Table, Form, Input, Radio, DatePicker, Col, Popconfirm, Divider, message } from 'antd'
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
@@ -86,6 +86,12 @@ const VotePromo = () => {
     try {
       const values = await form.validateFields()
       const { timeRange, ...params } = values
+
+      if (voteType === 10 && params.optionList?.length !== new Set(params.optionList)?.size) {
+        message.warn('请确认选择的代币选项没有重复代币')
+        setState((state) => ({ ...state, editLoading: false }))
+        return
+      }
 
       params.type = voteType
       params.startTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')

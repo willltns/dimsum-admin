@@ -22,7 +22,7 @@ message.config({ top: 52, duration: 2, maxCount: 1 })
 function App() {
   return (
     <MobXProviderContext.Provider value={rootStore}>
-      <BrowserRouter basename={'/mgmt'}>
+      <BrowserRouter>
         <ConfigProvider locale={zhCN}>
           <Header />
 

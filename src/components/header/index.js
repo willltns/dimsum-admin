@@ -1,4 +1,5 @@
 import ss from './index.module.less'
+import logo from '@/assets/img/logo.png'
 
 import React, { useEffect } from 'react'
 import { observer } from 'mobx-react'
@@ -32,7 +33,7 @@ function Header() {
   return (
     <header className={ss.header}>
       <Link className="logo" to="/">
-        YYDSCoins
+        <img src={logo} alt="logo" style={{ height: 40 }} />
       </Link>
 
       {!!common.unixTS && (

@@ -1,7 +1,7 @@
 // import ss from './index.module.less'
 
 import React, { useEffect, useCallback } from 'react'
-import { Button, Modal, Space, Table, Popconfirm, Row } from 'antd'
+import { Button, Modal, Space, Table, Popconfirm, Row, message } from 'antd'
 
 import { addCoin, updateCoin, fetchCoinList, updateCoinStatus, deleteCoin } from '@/pages/coin/xhr'
 import { coinStatusList, coinStatusMap } from '@/consts'
@@ -124,7 +124,11 @@ const CoinMGMT = () => {
     }
   }
 
-  const handleUpdateStatus = async (id, status) => {
+  const handleUpdateStatus = async (id, status, coin) => {
+    if (status === 30 && coin.coinSearchPromo) {
+      message.warn('该代币当前为推荐搜索代币，请先取消推荐搜索，再进行下市操作')
+      return
+    }
     setState((state) => ({ ...state, editLoading: true }))
 
     try {
@@ -311,9 +315,10 @@ const CoinMGMT = () => {
             title={`${+r.coinStatus === 10 ? '拒绝' : ''}${+r.coinStatus === 20 ? '下市' : ''}${
               +r.coinStatus === 30 ? '删除' : ''
             } $${r.coinSymbol} ？`}
-            onConfirm={() => handleUpdateStatus(r.id, +r.coinStatus === 20 ? 30 : undefined)}
+            onConfirm={() => handleUpdateStatus(r.id, +r.coinStatus === 20 ? 30 : undefined, r)}
+            disabled={+r.coinStatus === 30 && r.promoted}
           >
-            <Button type="text" danger size="small">
+            <Button danger type="text" size="small" disabled={+r.coinStatus === 30 && r.promoted}>
               {+r.coinStatus === 10 ? '拒绝' : ''}
               {+r.coinStatus === 20 ? '下市' : ''}
               {+r.coinStatus === 30 ? '删除' : ''}

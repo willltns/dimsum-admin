@@ -10,6 +10,7 @@
     "babel-plugin-import": "^1.13.3",
     "babel-plugin-lodash": "^3.3.4",
     "copy-webpack-plugin": "^6.4.1",
+    "env-cmd": "^10.1.0",
     "less": "^4.1.1",
     "less-loader": "7.3.0",
     "lodash-webpack-plugin": "^0.11.6",
@@ -25,10 +26,12 @@
   },
   "scripts": {
     "start": "react-scripts start",
+    "build:prod": "env-cmd -f .env.production npm run build",
+    "build:test": "env-cmd -f .env.test npm run build",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "build:analyze": "yarn build analyze",
+    "build:analyze": "yarn build:prod analyze",
     "build:dll": "webpack --config ./src/utils/webpack.dll.js"
   },
   "eslintConfig": {

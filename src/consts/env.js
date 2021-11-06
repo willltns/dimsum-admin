@@ -1,1 +1,1 @@
-export const fileDomain = process.env.REACT_APP_DOMAIN
+export const fileDomain = process.env.REACT_APP_DOMAIN + '/'
