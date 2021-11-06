@@ -263,7 +263,11 @@ const PromoCoinMGMT = () => {
       width: 200,
       ...getColumnSearchProps('备注', 'remark', handleInputSearch, remark),
     },
-
+    {
+      title: '新建时间',
+      dataIndex: 'promotedTime',
+      width: 170,
+    },
     {
       title: '操作',
       align: 'center',

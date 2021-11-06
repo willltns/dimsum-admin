@@ -249,7 +249,11 @@ const BannerMGMT = () => {
       dataIndex: 'remark',
       ...getColumnSearchProps('备注', 'remark', handleInputSearch, remark),
     },
-
+    {
+      title: '新建时间',
+      dataIndex: 'createTime',
+      width: 170,
+    },
     {
       title: '操作',
       align: 'center',

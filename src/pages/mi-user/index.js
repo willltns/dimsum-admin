@@ -1,11 +1,12 @@
 // import ss from './index.module.less'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { Button, Modal, Space, Table, Form, Input, Popconfirm } from 'antd'
+import { Button, Modal, Space, Table, Form, Input, Popconfirm, Row } from 'antd'
 
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { miUserStatusList, miUserStatusMap } from './consts'
 import { addUser, fetchUserList, updateUser, updateUserStatus } from '@/pages/mi-user/xhr'
+import ProfitCalc from '@/components/profit-calc/ProfitCalc'
 
 const MiUser = () => {
   const [state, setState] = useState({
@@ -173,9 +174,14 @@ const MiUser = () => {
 
   return (
     <section>
-      <Button type="primary" onClick={() => setState((state) => ({ ...state, modalVisible: true }))}>
-        添加用户
-      </Button>
+      <Row justify="space-between">
+        <Button type="primary" onClick={() => setState((state) => ({ ...state, modalVisible: true }))}>
+          添加用户
+        </Button>
+
+        <ProfitCalc />
+      </Row>
+
       <Space style={{ width: '100%' }}>
         <br />
       </Space>
