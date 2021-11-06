@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Button, Form, Input, Modal, Table } from 'antd'
 
 import { addChain, editChain, fetchChainList } from './xhr'
-import ImgUpload, { uploadErrorValidator } from '@/components/img-upload'
+import ImgUpload, { handleFileUpload, uploadErrorValidator } from '@/components/img-upload'
 import { fileDomain } from '@/consts'
 
 function ChainMGMT(props) {
@@ -35,8 +35,8 @@ function ChainMGMT(props) {
 
     try {
       const params = { ...values }
+      params.logo = values.logo[0]?.response || (await handleFileUpload(values.logo[0]?.originFileObj))
       curModify?.id && (params.id = curModify.id)
-      params.logo = params.logo?.[0]?.response || undefined
       curModify?.id ? await editChain({ ...params, id: curModify.id }) : await addChain(params)
       setState((state) => ({ ...state, editLoading: false, curModify: null }))
       handleChainList()
@@ -131,7 +131,7 @@ function ChainMGMT(props) {
             name="logo"
             valuePropName="fileList"
             getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
-            rules={[{ required: true, message: '请上传主网 Logo' }, uploadErrorValidator]}
+            rules={[{ required: true, message: '请上传主网 Logo' }]}
           >
             <ImgUpload />
           </Form.Item>

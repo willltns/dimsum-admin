@@ -8,7 +8,7 @@ import { adStatusList, adStatusMap, advertTypeList, advertTypeMap, fileDomain } 
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { fetchBannerList, addBanner, updateBanner, updateBannerStatus } from '@/pages/advert/xhr'
 
-import ImgUpload, { uploadErrorValidator, onPreview } from '@/components/img-upload'
+import ImgUpload, { onPreview, handleFileUpload } from '@/components/img-upload'
 import { Observer } from 'mobx-react'
 import { useStore } from '@/utils/hooks/useStore'
 
@@ -99,7 +99,7 @@ const BannerMGMT = () => {
 
       params.shelfTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')
       params.offShelfTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
-      params.bannerUrl = bannerUrl?.[0]?.response
+      params.bannerUrl = bannerUrl[0]?.response || (await handleFileUpload(bannerUrl[0]?.originFileObj))
 
       curModify?.id && (params.id = curModify.id)
       curModify?.id ? await updateBanner(params) : await addBanner(params)
@@ -353,9 +353,9 @@ const BannerMGMT = () => {
             name="bannerUrl"
             valuePropName="fileList"
             getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
-            rules={[{ required: true, message: '请上传横幅图片' }, uploadErrorValidator]}
+            rules={[{ required: true, message: '请上传横幅图片' }]}
           >
-            <ImgUpload fileMaxSize={10} />
+            <ImgUpload fileMaxSize={8} />
           </Form.Item>
           <Form.Item label="链接" name="linkUrl" rules={[{ required: true }]}>
             <Input placeholder="点击广告 banner 时的跳转链接" />

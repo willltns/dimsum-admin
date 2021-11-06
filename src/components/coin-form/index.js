@@ -7,7 +7,7 @@ import zh from './lang/zh.json'
 import en from './lang/en.json'
 import { fileDomain, urlReg } from '@/consts'
 import { descPH, presalePH, airdropPH, presaleTemplate, airdropTemplate, additionalLinkPH } from './const'
-import ImgUpload, { uploadErrorValidator } from '@/components/img-upload'
+import ImgUpload from '@/components/img-upload'
 
 // 是否中文
 const ifZh = (lang) => lang === 'zh'
@@ -58,7 +58,6 @@ function CoinForm(props) {
     }
 
     const params = { ...values, coinPresaleInfo, coinAirdropInfo, linkAdditionalInfo: linkAdditionalInfo?.trim() || '' }
-    params.coinLogo = params.coinLogo?.[0]?.response
     params.coinPresaleDate = params.coinPresaleDate || ''
     params.coinAirdropDate = params.coinAirdropDate || ''
 
@@ -66,7 +65,7 @@ function CoinForm(props) {
   }
 
   const onFinishFailed = ({ values, errorFields }) => {
-    if (!values?.logo?.[0]) uploadBtnRef.current.style.borderColor = '#ff4d4f'
+    if (!values.coinLogo?.[0]) uploadBtnRef.current.parentNode.parentNode.style = 'border-color: #ff4d4f'
 
     const firstErrorLabel = errorFields?.[0]?.name
     if (!firstErrorLabel) return
@@ -124,9 +123,12 @@ function CoinForm(props) {
               name="coinLogo"
               getValueFromEvent={(e) => (Array.isArray(e) ? e : e && e.fileList)}
               valuePropName="fileList"
-              rules={[{ required: true }, uploadErrorValidator]}
+              rules={[{ required: true }]}
             >
-              <ImgUpload iconRef={uploadBtnRef} onClick={() => (uploadBtnRef.current.style = '')} />
+              <ImgUpload
+                iconRef={uploadBtnRef}
+                onClick={() => (uploadBtnRef.current.parentNode.parentNode.style = '')}
+              />
             </Form.Item>
             <Form.Item label={tt.description} name="coinDescription" rules={[{ required: true, whitespace: true }]}>
               <Input.TextArea autoSize={{ minRows: 8 }} placeholder={descPH} />
@@ -248,7 +250,7 @@ function CoinForm(props) {
               <Input placeholder="contact@yydscoins.com" />
             </Form.Item>
             <Form.Item label={tt.contactTelegram} name="contactTg" rules={[{ whitespace: true }]}>
-              <Input placeholder="@yydscoins" />
+              <Input placeholder="@YYDSCoinsPromo" />
             </Form.Item>
 
             <Form.Item label="备注" name="remark">

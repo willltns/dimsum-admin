@@ -178,8 +178,8 @@ const MiUser = () => {
         <Button type="primary" onClick={() => setState((state) => ({ ...state, modalVisible: true }))}>
           添加用户
         </Button>
-
-        <ProfitCalc />
+        {/* TODO */}
+        {/* <ProfitCalc /> */}
       </Row>
 
       <Space style={{ width: '100%' }}>

@@ -8,27 +8,18 @@ import { fileDomain } from '@/consts'
 
 const acceptList = ['.png', '.jpg', '.jpeg', '.webp', '.gif']
 
-export async function handleFileUpload({ file, onError, onSuccess }) {
-  const formData = new FormData()
-  formData.append('file', file)
-
+export async function handleFileUpload(file) {
   try {
-    const res = await uploadFile(formData)
-    onSuccess(res, file)
+    if (!file) throw new Error('')
+    const formData = new FormData()
+    formData.append('file', file)
+
+    return await uploadFile(formData)
   } catch (err) {
-    onError('上传出错，请重新尝试')
+    message.error('上传图片出错，请重新尝试')
+    throw new Error('上传图片出错，请重新尝试')
   }
 }
-
-export const onPreview = ({ response }) =>
-  Modal.info({
-    icon: null,
-    centered: true,
-    closable: true,
-    maskClosable: true,
-    className: ss.previewImg,
-    content: <img src={fileDomain + response} alt="logo" />,
-  })
 
 function ImgUpload({ value, onChange, fileMaxSize = 0.1, iconRef, onClick, ...restProps }) {
   const beforeUpload = (file, fileList) => {
@@ -47,7 +38,7 @@ function ImgUpload({ value, onChange, fileMaxSize = 0.1, iconRef, onClick, ...re
       return Upload.LIST_IGNORE
     }
 
-    return true
+    return false
   }
 
   return (
@@ -56,7 +47,6 @@ function ImgUpload({ value, onChange, fileMaxSize = 0.1, iconRef, onClick, ...re
       maxCount={1}
       listType="picture-card"
       accept={acceptList.join(',')}
-      customRequest={handleFileUpload}
       beforeUpload={beforeUpload}
       className={ss.imgUpload}
       onPreview={onPreview}
@@ -71,10 +61,13 @@ function ImgUpload({ value, onChange, fileMaxSize = 0.1, iconRef, onClick, ...re
 
 export default ImgUpload
 
-//
-export const uploadErrorValidator = {
-  validator: (rule, value) =>
-    value?.[0]?.status === undefined || value?.[0]?.status === 'done' || value?.[0]?.status === 'uploading'
-      ? Promise.resolve()
-      : Promise.reject('上传出错，请删除或重新上传'),
+export function onPreview({ response, thumbUrl }) {
+  Modal.info({
+    icon: null,
+    centered: true,
+    closable: true,
+    maskClosable: true,
+    className: ss.previewImg,
+    content: <img src={response ? fileDomain + response : thumbUrl} alt="logo" />,
+  })
 }

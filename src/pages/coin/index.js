@@ -11,6 +11,7 @@ import UniqueUrlCol from './UniqueUrlCol'
 import CoinForm from '@/components/coin-form'
 import ChainMGMT from '@/components/chain-mgmt'
 import { fetchChainList } from '@/components/chain-mgmt/xhr'
+import { handleFileUpload } from '@/components/img-upload'
 
 const CoinMGMT = () => {
   const [state, setState] = React.useState({
@@ -116,6 +117,7 @@ const CoinMGMT = () => {
   const handleEditOk = async (params, id) => {
     setState((state) => ({ ...state, editLoading: true }))
     try {
+      params.coinLogo = params.coinLogo[0]?.response || (await handleFileUpload(params.coinLogo[0]?.originFileObj))
       id ? await updateCoin({ ...params, id }) : await addCoin(params)
       setState((state) => ({ ...state, editLoading: false, modalVisible: false }))
       handleCoinList()
