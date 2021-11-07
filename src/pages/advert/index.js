@@ -2,14 +2,18 @@ import ss from './index.module.less'
 
 import React from 'react'
 import { Tabs, Button, Modal, Popconfirm } from 'antd'
+
 import { getSearchPromo } from './xhr'
 import { updateCoin } from '@/pages/coin/xhr'
+import { useStore } from '@/utils/hooks/useStore'
 
 import BannerMGMT from './banner-mgmt'
 import PromoCoinMGMT from './promo-coin-mgmt'
 import XhrCoinSelect from '@/components/xhr-coin-select'
 
 const Home = () => {
+  const { common } = useStore()
+
   const [state, setState] = React.useState({
     visible: false,
     loading: false,
@@ -42,7 +46,7 @@ const Home = () => {
     if (visible) fetchSearchPromo()
   }, [visible])
 
-  const tabsRight = (
+  const tabsRight = common.auditorAuth && (
     <Button type="primary" onClick={() => setState((state) => ({ ...state, visible: true }))}>
       代币推荐搜索
     </Button>

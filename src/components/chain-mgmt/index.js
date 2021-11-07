@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { Button, Form, Input, Modal, Table } from 'antd'
 
 import { addChain, editChain, fetchChainList } from './xhr'
-import ImgUpload, { handleFileUpload, uploadErrorValidator } from '@/components/img-upload'
+import ImgUpload, { handleFileUpload } from '@/components/img-upload'
 import { fileDomain } from '@/consts'
 
 function ChainMGMT(props) {

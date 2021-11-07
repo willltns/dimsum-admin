@@ -3,12 +3,12 @@ import ss from './index.module.less'
 import React, { useState, useEffect, useCallback } from 'react'
 import { Button, Modal, Space, Table, Form, Input, Radio, DatePicker, Col, Popconfirm, Divider, message } from 'antd'
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
+import moment from 'moment'
+import { observer } from 'mobx-react'
 
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
-import moment from 'moment'
 import XhrCoinSelect from '@/components/xhr-coin-select'
 import { votePromoTypeList, votePromoStatusList, votePromoTypeMap, votePromoStatusMap } from './consts'
-import VoteModifier from '@/pages/vote-promo/VoteModifier'
 import {
   addVotePromo,
   deleteVotePromo,
@@ -16,8 +16,12 @@ import {
   fetchVotePromoList,
   updateVotePromoStatus,
 } from '@/pages/vote-promo/xhr'
+import { useStore } from '@/utils/hooks/useStore'
+
+import VoteModifier from '@/pages/vote-promo/VoteModifier'
 
 const VotePromo = () => {
+  const { common } = useStore()
   const [state, setState] = useState({
     total: 0,
     current: 1,
@@ -234,6 +238,7 @@ const VotePromo = () => {
       ),
     },
   ]
+  if (!common.auditorAuth) columns.pop()
 
   return (
     <section>
@@ -424,4 +429,4 @@ const VotePromo = () => {
   )
 }
 
-export default VotePromo
+export default observer(VotePromo)

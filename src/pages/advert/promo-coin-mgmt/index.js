@@ -310,6 +310,7 @@ const PromoCoinMGMT = () => {
       ),
     },
   ]
+  if (!common.auditorAuth) columns.pop()
 
   return (
     <>

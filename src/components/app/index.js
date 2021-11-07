@@ -31,7 +31,11 @@ function App() {
               !!rootStore.common.userinfo && (
                 <div className={ss.main}>
                   <Sidebar />
-                  <RouteWithSubRoutes routes={routes} />
+                  <RouteWithSubRoutes
+                    routes={routes.filter((r) =>
+                      r.accessRole ? r.accessRole.includes(rootStore.common.userinfo.role) : true
+                    )}
+                  />
                 </div>
               )
             }

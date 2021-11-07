@@ -6,9 +6,9 @@ import { advertTypeList } from '@/consts'
 
 const fetchProfit = (params) => axios.post('/getChargeByCond', params)
 
-const typeList = [...advertTypeList, { text: '推广代币', value: 0 }]
+const typeList = [...advertTypeList, { text: '推广代币', value: 0 }, { text: '其他', value: -1 }]
 
-function ProfitCalc(props) {
+function ProfitCalc() {
   const [state, setState] = useState({ visible: false, type: '', timeRange: [], loading: false, $: null })
   const { visible, type, timeRange, loading, $ } = state
 
@@ -17,11 +17,10 @@ function ProfitCalc(props) {
 
     const params = { type: type || undefined }
     if (timeRange?.length) {
-      params.startTime = timeRange[0].format('YYYY-MM-DD HH:mm:ss')
-      params.endTime = timeRange[1].format('YYYY-MM-DD HH:mm:ss')
+      params.startTime = timeRange[0].format('YYYY-MM-DD 00:00:00')
+      params.endTime = timeRange[1].format('YYYY-MM-DD 23:59:59')
     }
     try {
-      console.log(params)
       const res = await fetchProfit(params)
       setState((state) => ({ ...state, $: res, loading: false }))
     } catch (err) {
@@ -37,9 +36,10 @@ function ProfitCalc(props) {
 
   return (
     <>
-      <Button onClick={() => setState((state) => ({ ...state, visible: true }))}>Profit</Button>
+      <Button onClick={() => setState((state) => ({ ...state, visible: true }))}>Profit Calculator</Button>
 
       <Modal
+        width={600}
         footer={null}
         visible={visible}
         title="Profit Calculator"
@@ -65,7 +65,7 @@ function ProfitCalc(props) {
             <Button loading={loading} onClick={getProfit}>
               Get Profit
             </Button>
-            <h1 style={{ color: '#ff8200' }}>{$}</h1>
+            <h1 style={{ color: '#ff8200' }}>{$} BNB</h1>
           </Row>
         </Space>
       </Modal>
@@ -73,4 +73,4 @@ function ProfitCalc(props) {
   )
 }
 
-export default ProfitCalc
+export default React.memo(ProfitCalc)

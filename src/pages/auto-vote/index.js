@@ -1,30 +1,19 @@
 // import ss from './index.module.less'
 
 import React, { useCallback, useEffect } from 'react'
+import moment from 'moment'
+import { observer } from 'mobx-react'
 import { Button, Modal, Space, Table, Form, DatePicker, Col, InputNumber, Popconfirm, Input, Popover } from 'antd'
 
-import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
-import moment from 'moment'
-import XhrCoinSelect from '@/components/xhr-coin-select'
+import { useStore } from '@/utils/hooks/useStore'
 import { autoVoteStatusList, autoVoteStatusMap } from './consts'
+import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { addAutoVote, fetchAutoVoteList, updateAutoVoteStatus, deleteAutoVote } from '@/pages/auto-vote/xhr'
 
-// const obj = {
-//   id: 1,
-//   coinId: '1',
-//   coinName: 'dd是谁',
-//   coinSymbol: 'FDsV',
-//   startTime: '2021-10-10 18:00:00',
-//   endTime: '2021-10-25 20:00:00',
-//   status: '30',
-//   remark: 'ffff',
-//   intervalTimeMin: 10,
-//   intervalTimeMax: 20,
-//   perTimeVotesMin: 2,
-//   perTimeVotesMax: 5,
-// }
+import XhrCoinSelect from '@/components/xhr-coin-select'
 
 const AutoVote = () => {
+  const { common } = useStore()
   const [state, setState] = React.useState({
     total: 0,
     current: 1,
@@ -287,6 +276,7 @@ const AutoVote = () => {
       ),
     },
   ]
+  if (!common.auditorAuth) columns.pop()
 
   return (
     <section>
@@ -425,4 +415,4 @@ const AutoVote = () => {
   )
 }
 
-export default AutoVote
+export default observer(AutoVote)

@@ -12,7 +12,7 @@ function XhrCoinSelect(props) {
 
   const handleSearch = debounce(
     (value) => {
-      if (!value?.trim) return
+      if (!value?.trim()) return
 
       setState((state) => ({ ...state, loading: true }))
       fetchCoinByINS(value.trimLeft())

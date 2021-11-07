@@ -1,4 +1,5 @@
 export * from './chainType'
+export * from './userRole'
 export * from './advert'
 export * from './regexp'
 export * from './coin'

@@ -1,6 +1,7 @@
 import moment from 'moment'
 import { makeAutoObservable, flow, action } from 'mobx'
 import { getServerTime, getUserinfo, login } from '@/assets/xhr'
+import { userRoleMap } from '@/consts'
 
 export class CommonStore {
   constructor() {
@@ -12,6 +13,16 @@ export class CommonStore {
   loading = false
   unixTS = 0
   intervalTimer = null
+
+  get godAuth() {
+    return this.userinfo?.role <= userRoleMap.god
+  }
+  get auditorAuth() {
+    return this.userinfo?.role <= userRoleMap.auditor
+  }
+  get inputorAuth() {
+    return this.userinfo?.role <= userRoleMap.inputor
+  }
 
   // action
   updateUnixTS(date) {

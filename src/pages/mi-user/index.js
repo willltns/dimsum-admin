@@ -1,14 +1,19 @@
 // import ss from './index.module.less'
 
+import { observer } from 'mobx-react'
 import React, { useState, useEffect, useCallback } from 'react'
-import { Button, Modal, Space, Table, Form, Input, Popconfirm, Row } from 'antd'
+import { Button, Modal, Space, Table, Form, Input, Popconfirm, Row, Select } from 'antd'
 
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { miUserStatusList, miUserStatusMap } from './consts'
+import { userRoleList } from '@/consts'
 import { addUser, fetchUserList, updateUser, updateUserStatus } from '@/pages/mi-user/xhr'
 import ProfitCalc from '@/components/profit-calc/ProfitCalc'
+import { useStore } from '@/utils/hooks/useStore'
 
 const MiUser = () => {
+  const { common } = useStore()
+
   const [state, setState] = useState({
     total: 0,
     current: 1,
@@ -110,9 +115,14 @@ const MiUser = () => {
     {
       title: '用户',
       dataIndex: 'name',
-      fixed: 'left',
       width: 150,
       ...getColumnSearchProps('用户', 'name', handleInputSearch, name),
+    },
+    {
+      title: '角色',
+      dataIndex: 'role',
+      width: 150,
+      render: (t) => userRoleList.find((i) => i.value === t)?.text || '--',
     },
     {
       title: '状态',
@@ -178,8 +188,9 @@ const MiUser = () => {
         <Button type="primary" onClick={() => setState((state) => ({ ...state, modalVisible: true }))}>
           添加用户
         </Button>
-        {/* TODO */}
-        {/* <ProfitCalc /> */}
+
+        {/*TODO*/}
+        {/*<ProfitCalc />*/}
       </Row>
 
       <Space style={{ width: '100%' }}>
@@ -218,29 +229,48 @@ const MiUser = () => {
           <Form.Item label="用户名" name="name" rules={[{ required: true, whitespace: true }]}>
             <Input disabled={!!curModify} />
           </Form.Item>
-          {curModify && (
-            <Form.Item label="旧密码" name="oldPassword">
-              <Input.Password />
-            </Form.Item>
-          )}
-          <Form.Item label="密码" name="password" rules={[{ required: !curModify, whitespace: true }, { min: 8 }]}>
-            <Input.Password />
+          <Form.Item label="角色" name="role" rules={[{ required: true }]}>
+            <Select>
+              {userRoleList.map((item) => (
+                <Select.Option value={item.value} key={item.value}>
+                  {item.text}
+                </Select.Option>
+              ))}
+            </Select>
           </Form.Item>
-          <Form.Item
-            label="确认密码"
-            name="confirmPassword"
-            rules={[
-              { required: !curModify, whitespace: true },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue('password') === value) return Promise.resolve()
-                  return Promise.reject(new Error('两次输入的密码不匹配'))
-                },
-              }),
-            ]}
-          >
-            <Input.Password />
-          </Form.Item>
+
+          {!curModify || curModify.id === common.userinfo.id ? (
+            <>
+              {curModify && (
+                <Form.Item label="旧密码" name="oldPassword">
+                  <Input.Password />
+                </Form.Item>
+              )}
+              <Form.Item
+                label={curModify ? '新密码' : '密码'}
+                name="password"
+                rules={[{ required: !curModify, whitespace: true }, { min: 8 }]}
+              >
+                <Input.Password autoComplete="new-password" />
+              </Form.Item>
+              <Form.Item
+                label="确认密码"
+                name="confirmPassword"
+                rules={[
+                  { required: !curModify, whitespace: true },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue('password') === value) return Promise.resolve()
+                      return Promise.reject(new Error('两次输入的密码不匹配'))
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password />
+              </Form.Item>
+            </>
+          ) : null}
+
           <Form.Item label="备注" name="remark">
             <Input.TextArea />
           </Form.Item>
@@ -250,4 +280,4 @@ const MiUser = () => {
   )
 }
 
-export default MiUser
+export default observer(MiUser)

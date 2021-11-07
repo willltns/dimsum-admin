@@ -1,4 +1,5 @@
 import loadable from '@loadable/component'
+import { userRoleMap } from '@/consts'
 
 const loadableWithSpinner = (comp) => loadable(comp)
 
@@ -26,6 +27,7 @@ const routes = [
   {
     path: '/mi-user',
     exact: true,
+    accessRole: [userRoleMap.god],
     component: loadableWithSpinner(() => import('../pages/mi-user')),
   },
   /*{

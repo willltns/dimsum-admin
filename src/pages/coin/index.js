@@ -1,11 +1,13 @@
 // import ss from './index.module.less'
 
 import React, { useEffect, useCallback } from 'react'
+import { observer } from 'mobx-react'
 import { Button, Modal, Space, Table, Popconfirm, Row, message } from 'antd'
 
 import { addCoin, updateCoin, fetchCoinList, updateCoinStatus, deleteCoin } from '@/pages/coin/xhr'
 import { coinStatusList, coinStatusMap } from '@/consts'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
+import { useStore } from '@/utils/hooks/useStore'
 
 import UniqueUrlCol from './UniqueUrlCol'
 import CoinForm from '@/components/coin-form'
@@ -14,6 +16,7 @@ import { fetchChainList } from '@/components/chain-mgmt/xhr'
 import { handleFileUpload } from '@/components/img-upload'
 
 const CoinMGMT = () => {
+  const { common } = useStore()
   const [state, setState] = React.useState({
     total: 0,
     current: 1,
@@ -225,7 +228,7 @@ const CoinMGMT = () => {
       dataIndex: 'coinUniqueUrl',
       width: 120,
       ...getColumnSearchProps('Unique Url', 'coinUniqueUrl', handleInputSearch, contactEmail),
-      render: (_, r) => <UniqueUrlCol record={r} afterEdit={handleCoinList} />,
+      render: (_, r) => <UniqueUrlCol record={r} afterEdit={handleCoinList} editable={common.auditorAuth} />,
     },
     {
       title: '推广',
@@ -330,6 +333,7 @@ const CoinMGMT = () => {
       ),
     },
   ]
+  if (!common.auditorAuth) columns.pop()
 
   return (
     <section>
@@ -337,7 +341,8 @@ const CoinMGMT = () => {
         <Button type="primary" onClick={() => setState((state) => ({ ...state, modalVisible: true }))}>
           添加代币
         </Button>
-        <ChainMGMT updateChainList={updateChainList} />
+
+        {common.auditorAuth && <ChainMGMT updateChainList={updateChainList} />}
       </Row>
 
       <Space style={{ width: '100%' }}>
@@ -375,4 +380,4 @@ const CoinMGMT = () => {
   )
 }
 
-export default CoinMGMT
+export default observer(CoinMGMT)

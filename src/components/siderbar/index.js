@@ -1,11 +1,24 @@
 import ss from './index.module.less'
 
 import React from 'react'
+import { observer } from 'mobx-react'
 import { Menu, Button } from 'antd'
 import { useHistory, useLocation } from 'react-router-dom'
-import { DesktopOutlined, MenuUnfoldOutlined, MenuFoldOutlined } from '@ant-design/icons'
+import {
+  MenuUnfoldOutlined,
+  MenuFoldOutlined,
+  CopyrightOutlined,
+  BlockOutlined,
+  DollarCircleOutlined,
+  InboxOutlined,
+  TeamOutlined,
+} from '@ant-design/icons'
+
+import { useStore } from '@/utils/hooks/useStore'
 
 function Sidebar() {
+  const { common } = useStore()
+
   const [collapsed, setColl] = React.useState(false)
 
   const history = useHistory()
@@ -21,27 +34,26 @@ function Sidebar() {
         {React.createElement(collapsed ? MenuUnfoldOutlined : MenuFoldOutlined)}
       </Button>
       <Menu mode="inline" onClick={onMenuClick} inlineCollapsed={collapsed} selectedKeys={[location.pathname]}>
-        <Menu.Item key="/coin" icon={<DesktopOutlined />}>
+        <Menu.Item key="/coin" icon={<CopyrightOutlined />}>
           代币管理
         </Menu.Item>
-        <Menu.Item key="/auto-vote" icon={<DesktopOutlined />}>
+        <Menu.Item key="/auto-vote" icon={<BlockOutlined />}>
           自动投票管理
         </Menu.Item>
-        <Menu.Item key="/advert" icon={<DesktopOutlined />}>
+        <Menu.Item key="/advert" icon={<DollarCircleOutlined />}>
           广告管理
         </Menu.Item>
-        <Menu.Item key="/vote-promo" icon={<DesktopOutlined />}>
+        <Menu.Item key="/vote-promo" icon={<InboxOutlined />}>
           投票推广管理
         </Menu.Item>
-        {/*<Menu.Item key="/ui-user" icon={<DesktopOutlined />}>
-          前台用户管理
-        </Menu.Item>*/}
-        <Menu.Item key="/mi-user" icon={<DesktopOutlined />}>
-          后台用户管理
-        </Menu.Item>
+        {common.godAuth && (
+          <Menu.Item key="/mi-user" icon={<TeamOutlined />}>
+            后台用户管理
+          </Menu.Item>
+        )}
       </Menu>
     </div>
   )
 }
 
-export default Sidebar
+export default observer(Sidebar)

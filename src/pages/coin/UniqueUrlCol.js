@@ -5,7 +5,7 @@ import { Input, message, Modal, Tooltip } from 'antd'
 import { updateCoin } from '@/pages/coin/xhr'
 
 function UniqueUrlCol(props) {
-  const { record, afterEdit } = props
+  const { record, afterEdit, editable } = props
   const [state, setState] = useState({ visible: false, uniqueVal: '', loading: false })
   const { visible, uniqueVal, loading } = state
 
@@ -29,9 +29,11 @@ function UniqueUrlCol(props) {
     <>
       <div className={ss.uniqueUrlCol}>
         <Tooltip title={record.coinUniqueUrl}>{record.coinUniqueUrl || '--'}</Tooltip>
-        <i onClick={() => setState((state) => ({ ...state, visible: true, uniqueVal: record.coinUniqueUrl || '' }))}>
-          编辑
-        </i>
+        {editable && (
+          <i onClick={() => setState((state) => ({ ...state, visible: true, uniqueVal: record.coinUniqueUrl || '' }))}>
+            编辑
+          </i>
+        )}
       </div>
 
       <Modal

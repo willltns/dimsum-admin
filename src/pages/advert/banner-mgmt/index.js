@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import moment from 'moment'
+import { Observer, observer } from 'mobx-react'
 import { Button, DatePicker, Form, Input, Modal, Select, Table, Space, Popconfirm } from 'antd'
 
 import { adStatusList, adStatusMap, advertTypeList, advertTypeMap, fileDomain } from '@/consts'
@@ -9,7 +10,6 @@ import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { fetchBannerList, addBanner, updateBanner, updateBannerStatus } from '@/pages/advert/xhr'
 
 import ImgUpload, { onPreview, handleFileUpload } from '@/components/img-upload'
-import { Observer } from 'mobx-react'
 import { useStore } from '@/utils/hooks/useStore'
 
 const BannerMGMT = () => {
@@ -299,6 +299,7 @@ const BannerMGMT = () => {
       ),
     },
   ]
+  if (!common.auditorAuth) columns.pop()
 
   return (
     <>
@@ -393,4 +394,4 @@ const BannerMGMT = () => {
   )
 }
 
-export default BannerMGMT
+export default observer(BannerMGMT)
