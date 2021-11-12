@@ -1,15 +1,20 @@
+import moment from 'moment'
 import React, { useState, useEffect } from 'react'
 import { Button, Checkbox, DatePicker, Modal, Row, Space } from 'antd'
 
 import axios from '@/utils/axios'
 import { advertTypeList } from '@/consts'
+import { useStore } from '@/utils/hooks/useStore'
 
 const fetchProfit = (params) => axios.post('/getChargeByCond', params)
 
 const typeList = [...advertTypeList, { text: '推广代币', value: 0 }, { text: '其他', value: -1 }]
 
 function ProfitCalc() {
+  const { common } = useStore()
+
   const [state, setState] = useState({ visible: false, type: '', timeRange: [], loading: false, $: null })
+
   const { visible, type, timeRange, loading, $ } = state
 
   const getProfit = async () => {
@@ -29,8 +34,19 @@ function ProfitCalc() {
   }
 
   useEffect(() => {
-    if (visible) getProfit()
-    if (!visible) setState({ visible: false, type: '', timeRange: [], loading: false, $: null })
+    if (visible) {
+      getProfit()
+      return
+    }
+
+    setState({
+      visible: false,
+      type: '',
+      timeRange: [moment.unix(common.unixTS), moment.unix(common.unixTS)],
+      loading: false,
+      $: null,
+    })
+
     // eslint-disable-next-line
   }, [visible])
 
@@ -61,11 +77,11 @@ function ProfitCalc() {
             style={{ width: 368 }}
             onChange={(timeRange) => setState((state) => ({ ...state, timeRange }))}
           />
-          <Row justify="space-between">
-            <Button loading={loading} onClick={getProfit}>
+          <Row align="center" justify="space-between" style={{ marginTop: 16 }}>
+            <Button loading={loading} onClick={getProfit} type="primary">
               Get Profit
             </Button>
-            <h1 style={{ color: '#ff8200' }}>{$} BNB</h1>
+            <h1 style={{ color: '#ff8200', marginBottom: 0, lineHeight: 1 }}>{$ || '0'} BNB</h1>
           </Row>
         </Space>
       </Modal>

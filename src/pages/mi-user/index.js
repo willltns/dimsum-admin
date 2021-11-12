@@ -189,8 +189,7 @@ const MiUser = () => {
           添加用户
         </Button>
 
-        {/*TODO*/}
-        {/*<ProfitCalc />*/}
+        <ProfitCalc />
       </Row>
 
       <Space style={{ width: '100%' }}>

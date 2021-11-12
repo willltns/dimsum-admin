@@ -230,7 +230,7 @@ const BannerMGMT = () => {
       filters: adStatusList,
       render: (t) => adStatusMap[t]?.text,
     },
-    { title: '价格', dataIndex: 'price', width: 120 },
+    { title: '费用', dataIndex: 'price', width: 120 },
     {
       title: '联系邮箱',
       dataIndex: 'contactEmail',
@@ -362,10 +362,10 @@ const BannerMGMT = () => {
             <Input placeholder="点击广告 banner 时的跳转链接" />
           </Form.Item>
           <Form.Item
-            label="价格"
+            label="费用"
             name="price"
             validateTrigger="onBlur"
-            rules={[{ required: true }, { pattern: /^[0-9]+(.[0-9]{1,4})?$/, message: '请输入正确价格' }]}
+            rules={[{ required: true }, { pattern: /^(-)?\d+(\.\d+)?$/, message: '请输入正确费用' }]}
           >
             <Input />
           </Form.Item>

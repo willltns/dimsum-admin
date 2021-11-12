@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect } from 'react'
 import moment from 'moment'
-import { observer } from 'mobx-react'
+import { Observer, observer } from 'mobx-react'
 import { Button, Modal, Space, Table, Form, DatePicker, Col, InputNumber, Popconfirm, Input, Popover } from 'antd'
 
 import { useStore } from '@/utils/hooks/useStore'
@@ -196,6 +196,23 @@ const AutoVote = () => {
       width: 170,
       sorter: true,
       sortOrder: sortedField === 'startTime' ? sortedOrder : false,
+      render: (t, r) => (
+        <Observer
+          render={() => (
+            <div
+              style={
+                +r.status === 10 &&
+                moment(r.startTime, 'YYYY-MM-DD HH:mm:ss').unix() <= common.unixTS &&
+                moment(r.endTime, 'YYYY-MM-DD HH:mm:ss').unix() >= common.unixTS
+                  ? { color: '#00d62f', fontWeight: 500 }
+                  : undefined
+              }
+            >
+              {t}
+            </div>
+          )}
+        />
+      ),
     },
     {
       title: '结束时间',
@@ -231,7 +248,7 @@ const AutoVote = () => {
     {
       title: '状态',
       dataIndex: 'status',
-      width: 88,
+      width: 70,
       fixed: 'right',
       filteredValue: filteredStatus?.split(',') || null,
       filters: autoVoteStatusList,

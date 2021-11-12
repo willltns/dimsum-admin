@@ -9,6 +9,7 @@ import { useStore } from '@/utils/hooks/useStore'
 
 import BannerMGMT from './banner-mgmt'
 import PromoCoinMGMT from './promo-coin-mgmt'
+import OtherFeeMGMT from './other-fee-mgmt'
 import XhrCoinSelect from '@/components/xhr-coin-select'
 
 const Home = () => {
@@ -60,6 +61,9 @@ const Home = () => {
         </Tabs.TabPane>
         <Tabs.TabPane tab="推广代币" key="2">
           <PromoCoinMGMT />
+        </Tabs.TabPane>
+        <Tabs.TabPane tab="其他费用" key="3">
+          <OtherFeeMGMT />
         </Tabs.TabPane>
       </Tabs>
 

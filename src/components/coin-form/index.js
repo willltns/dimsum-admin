@@ -131,7 +131,7 @@ function CoinForm(props) {
               />
             </Form.Item>
             <Form.Item label={tt.description} name="coinDescription" rules={[{ required: true, whitespace: true }]}>
-              <Input.TextArea autoSize={{ minRows: 8 }} placeholder={descPH} />
+              <Input.TextArea autoSize={{ minRows: 8 }} placeholder={descPH} allowClear />
             </Form.Item>
             <Form.Item
               label={tt.launchDate}
@@ -235,21 +235,16 @@ function CoinForm(props) {
             </Form.Item>
             {/* prettier-ignore */}
             <Form.Item label={tt.addLinkInfo} name="linkAdditionalInfo" rules={[{ whitespace: true }]}>
-              <Input.TextArea autoSize={{ minRows: 6 }} placeholder={additionalLinkPH} />
+              <Input.TextArea autoSize={{ minRows: 6 }} placeholder={additionalLinkPH} allowClear/>
             </Form.Item>
 
             <Form.Item noStyle>
               <h2>{tt.contactInfoTitle}</h2>
             </Form.Item>
-            <Form.Item
-              label={tt.contactEmail}
-              name="contactEmail"
-              validateTrigger="onBlur"
-              rules={[{ required: true }, { type: 'email' }]}
-            >
-              <Input placeholder="contact@yydscoins.com" />
+            <Form.Item label={tt.contactEmail} name="contactEmail" validateTrigger="onBlur" rules={[{ type: 'email' }]}>
+              <Input placeholder="xxxxx@gmail.com" />
             </Form.Item>
-            <Form.Item label={tt.contactTelegram} name="contactTg" rules={[{ whitespace: true }]}>
+            <Form.Item label={tt.contactTelegram} name="contactTg" rules={[{ required: true, whitespace: true }]}>
               <Input placeholder="@YYDSCoinsPromo" />
             </Form.Item>
 
@@ -289,6 +284,7 @@ function CoinForm(props) {
           </Button>
         </div>
         <Input.TextArea
+          allowClear
           value={coinPresaleInfo}
           placeholder={presalePH}
           onChange={(e) => setState((state) => ({ ...state, coinPresaleInfo: e.target.value }))}
@@ -311,6 +307,7 @@ function CoinForm(props) {
           </Button>
         </div>
         <Input.TextArea
+          allowClear
           value={coinAirdropInfo}
           placeholder={airdropPH}
           onChange={(e) => setState((state) => ({ ...state, coinAirdropInfo: e.target.value }))}

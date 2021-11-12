@@ -244,7 +244,7 @@ const PromoCoinMGMT = () => {
       sorter: true,
       sortOrder: sortedField === 'coinUpvotesToday' ? sortedOrder : false,
     },
-    { title: '价格', dataIndex: 'promotedPrice', width: 120 },
+    { title: '费用', dataIndex: 'promotedPrice', width: 120 },
     {
       title: '联系邮箱',
       dataIndex: 'contactEmail',
@@ -364,10 +364,10 @@ const PromoCoinMGMT = () => {
           </Form.Item>
 
           <Form.Item
-            label="价格"
+            label="费用"
             name="promotedPrice"
             validateTrigger="onBlur"
-            rules={[{ required: true }, { pattern: /^[0-9]+(.[0-9]{1,4})?$/, message: '请输入正确价格' }]}
+            rules={[{ required: true }, { pattern: /^(-)?\d+(\.\d+)?$/, message: '请输入正确费用' }]}
           >
             <Input />
           </Form.Item>

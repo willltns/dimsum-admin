@@ -22,3 +22,15 @@ export const updatePromoCoin = (params) => axios.post('/advert/promo-coin/edit',
 export const updatePromoCoinStatus = (params) => axios.post('/advert/promo-coin/edit/status', params)
 
 export const getSearchPromo = () => axios.post('/coin/search/promo', {})
+
+// -------
+
+// 其他费用
+
+export const fetchOtherFeeList = (params) => axios.post('/other-fee/list', clearFalsyFields(params))
+
+export const addOtherFee = (params) => axios.post('/other-fee/add', params)
+
+export const updateOtherFee = (params) => axios.post('/other-fee/edit', params)
+
+export const deleteOtherFee = (id) => axios.post('/other-fee/delete', { id })
