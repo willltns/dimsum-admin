@@ -45,15 +45,19 @@
   cursor: pointer;
 }
 
-.logoutBtn {
+.ol {
   padding: 4px 12px;
   background: #fff;
   border-radius: 4px;
-  user-select: none;
-  cursor: pointer;
   box-shadow: 0 0 5px rgb(0 0 0 / 12%);
 
-  &:hover {
-    color: @primary-color;
+  > div {
+    user-select: none;
+    cursor: pointer;
+    margin: 6px 0;
+
+    &:hover {
+      color: @primary-color;
+    }
   }
 }

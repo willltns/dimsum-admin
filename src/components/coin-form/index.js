@@ -17,7 +17,7 @@ const dateReg =
   /^(((20\d{2})-(0(1|[3-9])|1[012])-(0[1-9]|[12]\d|30))|((20\d{2})-(0[13578]|1[02])-31)|((20\d{2})-02-(0[1-9]|1\d|2[0-8]))|(((20([13579][26]|[2468][048]|0[48]))|(2000))-02-29))\s([0-1][0-9]|2[0-3]):([0-5][0-9])$/
 
 function CoinForm(props) {
-  const { coinInfo, loading, onOk, coinChainList } = props
+  const { coinInfo, loading, onOk, coinChainList, commonStore } = props
 
   const uploadBtnRef = useRef(null)
   const linkTipRef = useRef(null)
@@ -38,9 +38,9 @@ function CoinForm(props) {
       ...state,
       coinPresaleInfo: coinInfo.coinPresaleInfo || '',
       coinAirdropInfo: coinInfo.coinAirdropInfo || '',
-      canEdit: +coinInfo.coinStatus !== +10,
+      canEdit: commonStore.inputorAuth || +coinInfo.coinStatus !== +10,
     }))
-  }, [coinInfo])
+  }, [coinInfo, commonStore.inputorAuth])
 
   const tt = ifZh(lang) ? zh : en
 
@@ -245,7 +245,7 @@ function CoinForm(props) {
               <Input placeholder="xxxxx@gmail.com" />
             </Form.Item>
             <Form.Item label={tt.contactTelegram} name="contactTg" rules={[{ required: true, whitespace: true }]}>
-              <Input placeholder="@YYDSCoinsPromo" />
+              <Input placeholder="@Your contact telegram account" />
             </Form.Item>
 
             <Form.Item label="备注" name="remark">

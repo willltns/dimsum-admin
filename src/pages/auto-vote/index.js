@@ -263,7 +263,7 @@ const AutoVote = () => {
       render: (_, r) => (
         <Space>
           <Popconfirm
-            title={`激活 $${r.coinSymbol} ？`}
+            title={`激活 ${r.coinSymbol} ？`}
             disabled={+r.status !== 10 || editLoading}
             onConfirm={() => handleUpdateStatus(r.id, 20)}
           >
@@ -272,7 +272,7 @@ const AutoVote = () => {
             </Button>
           </Popconfirm>
           <Popconfirm
-            title={`结束 $${r.coinSymbol} ？`}
+            title={`结束 ${r.coinSymbol} ？`}
             disabled={+r.status === 40 || editLoading}
             onConfirm={() => handleUpdateStatus(r.id, 40)}
           >
@@ -281,7 +281,7 @@ const AutoVote = () => {
             </Button>
           </Popconfirm>
           <Popconfirm
-            title={`删除 $${r.coinSymbol} ？`}
+            title={`删除 ${r.coinSymbol} ？`}
             disabled={+r.status !== 40 || editLoading}
             onConfirm={() => handleUpdateStatus(r.id)}
           >
@@ -293,7 +293,6 @@ const AutoVote = () => {
       ),
     },
   ]
-  if (!common.auditorAuth) columns.pop()
 
   return (
     <section>

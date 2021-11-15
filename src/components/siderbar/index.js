@@ -37,15 +37,21 @@ function Sidebar() {
         <Menu.Item key="/coin" icon={<CopyrightOutlined />}>
           代币管理
         </Menu.Item>
-        <Menu.Item key="/auto-vote" icon={<BlockOutlined />}>
-          自动投票管理
-        </Menu.Item>
-        <Menu.Item key="/advert" icon={<DollarCircleOutlined />}>
-          广告管理
-        </Menu.Item>
-        <Menu.Item key="/vote-promo" icon={<InboxOutlined />}>
-          投票推广管理
-        </Menu.Item>
+
+        {(common.auditorAuth || common.godAuth) && (
+          <>
+            <Menu.Item key="/auto-vote" icon={<BlockOutlined />}>
+              自动投票管理
+            </Menu.Item>
+            <Menu.Item key="/advert" icon={<DollarCircleOutlined />}>
+              广告管理
+            </Menu.Item>
+            <Menu.Item key="/vote-promo" icon={<InboxOutlined />}>
+              投票推广管理
+            </Menu.Item>
+          </>
+        )}
+
         {common.godAuth && (
           <Menu.Item key="/mi-user" icon={<TeamOutlined />}>
             后台用户管理

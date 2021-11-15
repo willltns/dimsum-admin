@@ -15,13 +15,13 @@ export class CommonStore {
   intervalTimer = null
 
   get godAuth() {
-    return this.userinfo?.role <= userRoleMap.god
+    return +this.userinfo?.role === +userRoleMap.god
   }
   get auditorAuth() {
-    return this.userinfo?.role <= userRoleMap.auditor
+    return +this.userinfo?.role === +userRoleMap.auditor
   }
   get inputorAuth() {
-    return this.userinfo?.role <= userRoleMap.inputor
+    return +this.userinfo?.role === +userRoleMap.inputor
   }
 
   // action

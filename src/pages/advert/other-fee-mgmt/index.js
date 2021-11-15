@@ -5,11 +5,8 @@ import { Button, Form, Input, Modal, Table, Space, Popconfirm, message } from 'a
 
 import { fetchOtherFeeList, addOtherFee, updateOtherFee, deleteOtherFee } from '@/pages/advert/xhr'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
-import { useStore } from '@/utils/hooks/useStore'
 
 const OtherFeeMGMT = () => {
-  const { common } = useStore()
-
   const [state, setState] = useState({
     total: 0,
     current: 1,
@@ -154,19 +151,17 @@ const OtherFeeMGMT = () => {
             修改
           </Button>
 
-          {common.godAuth && (
-            <Popconfirm
-              title={`删除 ID 为 ${r.id} 的数据 ？`}
-              onConfirm={() => {
-                if (!r.price) handleDelete(r.id)
-                else message.warn(`当前数据有计费用 ${r.price}，请确认清空费用`)
-              }}
-            >
-              <Button danger type="link" size="small">
-                删除
-              </Button>
-            </Popconfirm>
-          )}
+          <Popconfirm
+            title={`删除 ID 为 ${r.id} 的数据 ？`}
+            onConfirm={() => {
+              if (!r.price) handleDelete(r.id)
+              else message.warn(`当前数据有计费用 ${r.price}，请确认清空费用`)
+            }}
+          >
+            <Button danger type="link" size="small">
+              删除
+            </Button>
+          </Popconfirm>
         </Space>
       ),
     },

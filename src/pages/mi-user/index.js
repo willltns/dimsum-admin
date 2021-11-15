@@ -208,10 +208,9 @@ const MiUser = () => {
         scroll={{ x: columns.reduce((t, { width, fixed }) => (fixed || !width ? t : t + width), 0) }}
       />
 
-      {/* 设置投票推广 */}
+      {/* 编辑用户信息 */}
       <Modal
         centered
-        width={600}
         destroyOnClose
         keyboard={false}
         maskClosable={false}

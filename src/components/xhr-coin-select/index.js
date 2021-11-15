@@ -39,7 +39,7 @@ function XhrCoinSelect(props) {
     >
       {list?.map((item) => (
         <Select.Option value={item.id} key={item.id}>
-          {item.coinName} (${item.coinSymbol}) {item.id}
+          {item.coinName} ({item.coinSymbol}) {item.id}
         </Select.Option>
       ))}
     </Select>

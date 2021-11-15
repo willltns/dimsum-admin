@@ -12,16 +12,19 @@ const routes = [
   {
     path: '/auto-vote',
     exact: true,
+    accessRole: [userRoleMap.auditor, userRoleMap.god],
     component: loadableWithSpinner(() => import('../pages/auto-vote')),
   },
   {
     path: '/advert',
     exact: true,
+    accessRole: [userRoleMap.auditor, userRoleMap.god],
     component: loadableWithSpinner(() => import('../pages/advert')),
   },
   {
     path: '/vote-promo',
     exact: true,
+    accessRole: [userRoleMap.auditor, userRoleMap.god],
     component: loadableWithSpinner(() => import('../pages/vote-promo')),
   },
   {

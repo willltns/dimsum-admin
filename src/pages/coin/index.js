@@ -228,7 +228,7 @@ const CoinMGMT = () => {
       dataIndex: 'coinUniqueUrl',
       width: 120,
       ...getColumnSearchProps('Unique Url', 'coinUniqueUrl', handleInputSearch, contactEmail),
-      render: (_, r) => <UniqueUrlCol record={r} afterEdit={handleCoinList} editable={common.auditorAuth} />,
+      render: (_, r) => <UniqueUrlCol record={r} afterEdit={handleCoinList} editable={!common.inputorAuth} />,
     },
     {
       title: '推广',
@@ -294,46 +294,56 @@ const CoinMGMT = () => {
       title: '操作',
       align: 'center',
       dataIndex: 'operate',
-      width: 160,
+      width: common.inputorAuth ? 55 : 160,
       fixed: 'right',
-      render: (_, r) => (
-        <Space>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => setState((state) => ({ ...state, modalVisible: true, curModify: r }))}
-          >
-            {+r.coinStatus === 10 ? '审核' : '修改'}
-          </Button>
-
-          <Popconfirm
-            title={`上市 $${r.coinSymbol} ？`}
-            disabled={+r.coinStatus === 20}
-            onConfirm={() => handleUpdateStatus(r.id, 20)}
-          >
-            <Button type="link" size="small" disabled={+r.coinStatus === 20}>
-              上市
+      render: (_, r) =>
+        common.inputorAuth ? (
+          +r.coinStatus === 10 && (
+            <Button
+              type="link"
+              size="small"
+              onClick={() => setState((state) => ({ ...state, modalVisible: true, curModify: r }))}
+            >
+              修改
             </Button>
-          </Popconfirm>
-
-          <Popconfirm
-            title={`${+r.coinStatus === 10 ? '拒绝' : ''}${+r.coinStatus === 20 ? '下市' : ''}${
-              +r.coinStatus === 30 ? '删除' : ''
-            } $${r.coinSymbol} ？`}
-            onConfirm={() => handleUpdateStatus(r.id, +r.coinStatus === 20 ? 30 : undefined, r)}
-            disabled={+r.coinStatus === 30 && r.promoted}
-          >
-            <Button danger type="text" size="small" disabled={+r.coinStatus === 30 && r.promoted}>
-              {+r.coinStatus === 10 ? '拒绝' : ''}
-              {+r.coinStatus === 20 ? '下市' : ''}
-              {+r.coinStatus === 30 ? '删除' : ''}
+          )
+        ) : (
+          <Space>
+            <Button
+              type="link"
+              size="small"
+              onClick={() => setState((state) => ({ ...state, modalVisible: true, curModify: r }))}
+            >
+              {+r.coinStatus === 10 ? '审核' : '修改'}
             </Button>
-          </Popconfirm>
-        </Space>
-      ),
+
+            <Popconfirm
+              title={`上市 ${r.coinSymbol} ？`}
+              disabled={+r.coinStatus === 20}
+              onConfirm={() => handleUpdateStatus(r.id, 20)}
+            >
+              <Button type="link" size="small" disabled={+r.coinStatus === 20}>
+                上市
+              </Button>
+            </Popconfirm>
+
+            <Popconfirm
+              title={`${+r.coinStatus === 10 ? '拒绝' : ''}${+r.coinStatus === 20 ? '下市' : ''}${
+                +r.coinStatus === 30 ? '删除' : ''
+              } ${r.coinSymbol} ？`}
+              onConfirm={() => handleUpdateStatus(r.id, +r.coinStatus === 20 ? 30 : undefined, r)}
+              disabled={+r.coinStatus === 30 && r.promoted}
+            >
+              <Button danger type="text" size="small" disabled={+r.coinStatus === 30 && r.promoted}>
+                {+r.coinStatus === 10 ? '拒绝' : ''}
+                {+r.coinStatus === 20 ? '下市' : ''}
+                {+r.coinStatus === 30 ? '删除' : ''}
+              </Button>
+            </Popconfirm>
+          </Space>
+        ),
     },
   ]
-  if (!common.auditorAuth) columns.pop()
 
   return (
     <section>
@@ -342,7 +352,7 @@ const CoinMGMT = () => {
           添加代币
         </Button>
 
-        {common.auditorAuth && <ChainMGMT updateChainList={updateChainList} />}
+        {!common.inputorAuth && <ChainMGMT updateChainList={updateChainList} />}
       </Row>
 
       <Space style={{ width: '100%' }}>
@@ -370,11 +380,17 @@ const CoinMGMT = () => {
         maskClosable={false}
         visible={modalVisible}
         closable={!editLoading}
-        title={curModify ? '修改代币' : '添加代币'}
+        title={curModify ? (common.inputorAuth || +curModify.coinStatus !== 10 ? '修改代币' : '审核代币') : '添加代币'}
         onCancel={() => setState((state) => ({ ...state, modalVisible: false, curModify: null }))}
         bodyStyle={{ height: '80vh', overflowY: 'auto' }}
       >
-        <CoinForm coinInfo={curModify} loading={editLoading} onOk={handleEditOk} coinChainList={coinChainList} />
+        <CoinForm
+          coinInfo={curModify}
+          loading={editLoading}
+          onOk={handleEditOk}
+          coinChainList={coinChainList}
+          commonStore={common}
+        />
       </Modal>
     </section>
   )

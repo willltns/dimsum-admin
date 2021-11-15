@@ -281,7 +281,7 @@ const PromoCoinMGMT = () => {
             size="small"
             onClick={() => {
               setState((state) => ({ ...state, modalVisible: true, curModify: r }))
-              const fields = { ...r, id: `${r.coinName} ($${r.coinSymbol}) ${r.id}` }
+              const fields = { ...r, id: `${r.coinName} (${r.coinSymbol}) ${r.id}` }
               fields.timeRange = [moment(r.promotedShelfTime), moment(r.promotedOffShelfTime)]
               setTimeout(() => form.setFieldsValue({ ...fields }))
             }}
@@ -289,7 +289,7 @@ const PromoCoinMGMT = () => {
             修改
           </Button>
           <Popconfirm
-            title={`上架 $${r.coinSymbol} ？`}
+            title={`上架 ${r.coinSymbol} ？`}
             disabled={+r.promotedStatus === 20 || editLoading}
             onConfirm={() => handleUpdateStatus(r.id, 20)}
           >
@@ -298,7 +298,7 @@ const PromoCoinMGMT = () => {
             </Button>
           </Popconfirm>
           <Popconfirm
-            title={`下架 $${r.coinSymbol} ？`}
+            title={`下架 ${r.coinSymbol} ？`}
             disabled={+r.promotedStatus === 30 || editLoading}
             onConfirm={() => handleUpdateStatus(r.id, 30)}
           >

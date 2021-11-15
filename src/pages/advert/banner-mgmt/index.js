@@ -299,7 +299,6 @@ const BannerMGMT = () => {
       ),
     },
   ]
-  if (!common.auditorAuth) columns.pop()
 
   return (
     <>

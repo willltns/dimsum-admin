@@ -16,12 +16,10 @@ import {
   fetchVotePromoList,
   updateVotePromoStatus,
 } from '@/pages/vote-promo/xhr'
-import { useStore } from '@/utils/hooks/useStore'
 
 import VoteModifier from '@/pages/vote-promo/VoteModifier'
 
 const VotePromo = () => {
-  const { common } = useStore()
   const [state, setState] = useState({
     total: 0,
     current: 1,
@@ -238,7 +236,6 @@ const VotePromo = () => {
       ),
     },
   ]
-  if (!common.auditorAuth) columns.pop()
 
   return (
     <section>
@@ -404,7 +401,7 @@ const VotePromo = () => {
               选项 {index + 1}：
               <b>
                 {+votePromoDetail?.type === 10
-                  ? `${item.coinName} ($${item.coinSymbol}) ${item.coinId}`
+                  ? `${item.coinName} (${item.coinSymbol}) ${item.coinId}`
                   : item.optionDesc}
               </b>
             </p>

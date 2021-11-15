@@ -7,5 +7,5 @@ export const userRoleMap = {
 export const userRoleList = [
   { text: '超级管理', value: userRoleMap.god },
   { text: '审核员', value: userRoleMap.auditor },
-  { text: '录入员', value: userRoleMap.inputor },
+  { text: '代币录入员', value: userRoleMap.inputor },
 ]
