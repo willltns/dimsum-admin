@@ -1,12 +1,12 @@
 import ss from './index.module.less'
 
 import React, { useRef, useState, useEffect } from 'react'
-import { Form, Input, Button, Row, Col, Select, Modal } from 'antd'
+import { Form, Input, Button, Row, Col, Select } from 'antd'
 
 import zh from './lang/zh.json'
 import en from './lang/en.json'
 import { fileDomain, urlReg } from '@/consts'
-import { descPH, presalePH, airdropPH, presaleTemplate, airdropTemplate, additionalLinkPH } from './const'
+import { descPH, additionalLinkPH } from './const'
 import ImgUpload from '@/components/img-upload'
 
 // 是否中文
@@ -22,27 +22,22 @@ function CoinForm(props) {
   const uploadBtnRef = useRef(null)
   const linkTipRef = useRef(null)
 
-  const [state, setState] = useState({
-    lang: 'zh',
-    coinPresaleInfo: '',
-    coinAirdropInfo: '',
-    presaleModalVisible: false,
-    airdropModalVisible: false,
-    canEdit: true,
-  })
-  const { lang, coinPresaleInfo, coinAirdropInfo, presaleModalVisible, airdropModalVisible, canEdit } = state
+  const [state, setState] = useState({ lang: 'zh', presaleDateR: false, wlsDateR: false, canEdit: true })
+  const { lang, presaleDateR, wlsDateR, canEdit } = state
 
   useEffect(() => {
     if (!coinInfo?.id) return
     setState((state) => ({
       ...state,
-      coinPresaleInfo: coinInfo.coinPresaleInfo || '',
-      coinAirdropInfo: coinInfo.coinAirdropInfo || '',
+      presaleDateR: !!coinInfo.coinPresaleInfo,
+      wlsDateR: !!coinInfo.coinAirdropInfo,
       canEdit: commonStore.inputorAuth || +coinInfo.coinStatus !== +10,
     }))
   }, [coinInfo, commonStore.inputorAuth])
 
   const tt = ifZh(lang) ? zh : en
+
+  const [form] = Form.useForm()
 
   const onFinish = (values) => {
     const { linkWebsite, linkChineseTg, linkEnglishTg, linkTwitter, linkMedium, linkDiscord, linkAdditionalInfo } =
@@ -57,9 +52,9 @@ function CoinForm(props) {
       return
     }
 
-    const params = { ...values, coinPresaleInfo, coinAirdropInfo, linkAdditionalInfo: linkAdditionalInfo?.trim() || '' }
-    params.coinPresaleDate = params.coinPresaleDate || ''
-    params.coinAirdropDate = params.coinAirdropDate || ''
+    const params = { ...values, linkAdditionalInfo: linkAdditionalInfo?.trim() || '' }
+    params.coinPresaleDate = params.coinPresaleDate || '1970-01-01 00:00'
+    params.coinAirdropDate = params.coinAirdropDate || '1970-01-01 00:00'
 
     onOk(params, coinInfo?.id || undefined)
   }
@@ -73,14 +68,22 @@ function CoinForm(props) {
     if (errorEl) errorEl.scrollIntoView()
   }
 
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields()
+      await onFinish(values)
+    } catch (error) {
+      onFinishFailed(error)
+    }
+  }
+
   return (
     <section className={ss.addCoin}>
       <Form
+        form={form}
         layout="vertical"
         autoComplete="off"
         className={ss.form}
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
         validateMessages={{ required: ' ', whitespace: ' ', pattern: { mismatch: ` ` }, types: { email: ` ` } }}
         onValuesChange={(changedValue, allValues) => {
           // prettier-ignore
@@ -100,11 +103,7 @@ function CoinForm(props) {
                 coinPresaleDate: coinInfo.coinPresaleDate?.slice(0, -3) || '',
                 coinAirdropDate: coinInfo.coinAirdropDate?.slice(0, -3) || '',
               }
-            : {
-                coinLaunchDate: '2021-00-00 00:00',
-                coinPresaleDate: '2021-00-00 00:00',
-                coinAirdropDate: '2021-00-00 00:00',
-              }
+            : { coinLaunchDate: '2021-00-00 00:00' }
         }
       >
         <Row className={ifZh(lang) ? ss.zhMode : ss.enMode}>
@@ -130,7 +129,10 @@ function CoinForm(props) {
                 onClick={() => (uploadBtnRef.current.parentNode.parentNode.style = '')}
               />
             </Form.Item>
-            <Form.Item label={tt.description} name="coinDescription" rules={[{ required: true, whitespace: true }]}>
+            <Form.Item label="代币中文描述" name="coinDescription" rules={[{ required: true, whitespace: true }]}>
+              <Input.TextArea autoSize={{ minRows: 8 }} placeholder={descPH} allowClear />
+            </Form.Item>
+            <Form.Item label="代币英文描述" name="coinDescriptionEN" rules={[{ whitespace: true }]}>
               <Input.TextArea autoSize={{ minRows: 8 }} placeholder={descPH} allowClear />
             </Form.Item>
             <Form.Item
@@ -155,56 +157,49 @@ function CoinForm(props) {
               </Select>
             </Form.Item>
             <Form.Item label={tt.contractAddress} name="coinAddress" rules={[{ whitespace: true }]}>
-              <Input placeholder="0x0000...." />
-            </Form.Item>
-
-            <Form.Item noStyle>
-              <h2>{tt.presale_airdrop}</h2>
-              <div className={ss.paBtns}>
-                {/* 预售信息填写 */}
-                <div>
-                  <Button
-                    className={`${coinPresaleInfo ? ss.infoFilled : ''}`}
-                    onClick={() => setState((state) => ({ ...state, presaleModalVisible: true }))}
-                  >
-                    {tt.presaleInformation}
-                  </Button>
-                  {!!coinPresaleInfo && (
-                    <Form.Item
-                      label="预售开始时间"
-                      name="coinPresaleDate"
-                      validateTrigger="onBlur"
-                      rules={[{ required: true }, { pattern: dateReg, message: ' ' }]}
-                    >
-                      <Input placeholder="YYYY-MM-DD HH:mm" />
-                    </Form.Item>
-                  )}
-                </div>
-
-                {/* 空投信息填写 */}
-                <div>
-                  <Button
-                    className={`${coinAirdropInfo ? ss.infoFilled : ''}`}
-                    onClick={() => setState((state) => ({ ...state, airdropModalVisible: true }))}
-                  >
-                    {tt.airdropInformation}
-                  </Button>
-                  {!!coinAirdropInfo && (
-                    <Form.Item
-                      label="空投参与时间"
-                      name="coinAirdropDate"
-                      validateTrigger="onBlur"
-                      rules={[{ required: true }, { pattern: dateReg, message: ' ' }]}
-                    >
-                      <Input placeholder="YYYY-MM-DD HH:mm" />
-                    </Form.Item>
-                  )}
-                </div>
-              </div>
+              <Input placeholder="0x000000..." />
             </Form.Item>
           </Col>
 
           <Col>
+            <Form.Item noStyle>
+              <h2>{tt.presale_wls}</h2>
+            </Form.Item>
+
+            {/* prettier-ignore */}
+            <Form.Item label={tt.presaleLink} name="coinPresaleInfo" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
+              <Input placeholder="https://..." onBlur={e => {
+                const value = e.target?.value?.trim()
+                setState(state => ({...state, presaleDateR: urlReg.test(value)}))
+                if (value === '' || urlReg.test(value)) form.validateFields(['coinPresaleDate'])
+              }}/>
+            </Form.Item>
+            <Form.Item
+              label={tt.coinPresaleDate}
+              name="coinPresaleDate"
+              validateTrigger="onBlur"
+              rules={[{ required: presaleDateR }, { pattern: dateReg, message: ' ' }]}
+            >
+              <Input placeholder="YYYY-MM-DD HH:mm" />
+            </Form.Item>
+
+            {/* prettier-ignore */}
+            <Form.Item label={tt.wlsLink} name="coinAirdropInfo" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
+              <Input placeholder="https://..."  onBlur={e => {
+                const value = e.target?.value?.trim()
+                setState(state => ({...state, wlsDateR: urlReg.test(value)}))
+                if (value === '' || urlReg.test(value)) form.validateFields(['coinAirdropDate'])
+              }}/>
+            </Form.Item>
+            <Form.Item
+              label={tt.coinWlsDate}
+              name="coinAirdropDate"
+              validateTrigger="onBlur"
+              rules={[{ required: wlsDateR }, { pattern: dateReg, message: ' ' }]}
+            >
+              <Input placeholder="YYYY-MM-DD HH:mm" />
+            </Form.Item>
+
             <Form.Item noStyle>
               {/* prettier-ignore */}
               <h2>{tt.linkTitle}<span className={ss.linkTip} ref={linkTipRef}>{tt.linkTip}</span></h2>
@@ -235,7 +230,7 @@ function CoinForm(props) {
             </Form.Item>
             {/* prettier-ignore */}
             <Form.Item label={tt.addLinkInfo} name="linkAdditionalInfo" rules={[{ whitespace: true }]}>
-              <Input.TextArea autoSize={{ minRows: 6 }} placeholder={additionalLinkPH} allowClear/>
+              <Input.TextArea autoSize={{ minRows: 6 }} placeholder={additionalLinkPH} allowClear className={ss.addiInfo}/>
             </Form.Item>
 
             <Form.Item noStyle>
@@ -254,9 +249,9 @@ function CoinForm(props) {
           </Col>
         </Row>
 
-        <div style={{ textAlign: 'center', marginTop: 16, position: 'relative' }}>
+        <div style={{ textAlign: 'center', marginTop: 16, marginBottom: 66, position: 'relative' }}>
           {canEdit ? (
-            <Button htmlType="submit" className={ss.submitBtn} loading={loading}>
+            <Button className={ss.submitBtn} loading={loading} onClick={handleSubmit}>
               {coinInfo?.id ? '修改' : '添加'}代币
             </Button>
           ) : (
@@ -270,52 +265,6 @@ function CoinForm(props) {
           )}
         </div>
       </Form>
-
-      {/* 预售信息补充弹窗 */}
-      <Modal footer={null} closable={false} keyboard={false} className={ss.paModal} visible={presaleModalVisible}>
-        <div className={ss.modalHead}>
-          <p>{tt.presaleInformation}</p>
-          <Button
-            type="link"
-            disabled={!!coinPresaleInfo.trim()}
-            onClick={() => setState((state) => ({ ...state, coinPresaleInfo: presaleTemplate }))}
-          >
-            {tt.injectTemplate}
-          </Button>
-        </div>
-        <Input.TextArea
-          allowClear
-          value={coinPresaleInfo}
-          placeholder={presalePH}
-          onChange={(e) => setState((state) => ({ ...state, coinPresaleInfo: e.target.value }))}
-          autoSize={{ minRows: 10 }}
-        />
-        {/* prettier-ignore */}
-        <Button type="primary" onClick={() => setState((state) => ({ ...state, coinPresaleInfo: state.coinPresaleInfo.trim(), presaleModalVisible: false }))}>OK</Button>
-      </Modal>
-
-      {/* 空投信息补充弹窗 */}
-      <Modal footer={null} closable={false} keyboard={false} className={ss.paModal} visible={airdropModalVisible}>
-        <div className={ss.modalHead}>
-          <p>{tt.airdropInformation}</p>
-          <Button
-            type="link"
-            disabled={!!coinAirdropInfo.trim()}
-            onClick={() => setState((state) => ({ ...state, coinAirdropInfo: airdropTemplate }))}
-          >
-            {tt.injectTemplate}
-          </Button>
-        </div>
-        <Input.TextArea
-          allowClear
-          value={coinAirdropInfo}
-          placeholder={airdropPH}
-          onChange={(e) => setState((state) => ({ ...state, coinAirdropInfo: e.target.value }))}
-          autoSize={{ minRows: 10 }}
-        />
-        {/* prettier-ignore */}
-        <Button type="primary" onClick={() => setState((state) => ({ ...state, coinAirdropInfo: state.coinAirdropInfo.trim(), airdropModalVisible: false }))}>{tt.okBtnText}</Button>
-      </Modal>
     </section>
   )
 }

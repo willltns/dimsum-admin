@@ -373,7 +373,7 @@ const CoinMGMT = () => {
       {/* 编辑弹窗 */}
       <Modal
         centered
-        width={1000}
+        width={1440}
         footer={null}
         destroyOnClose
         keyboard={false}

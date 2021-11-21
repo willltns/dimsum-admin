@@ -163,7 +163,8 @@ const VotePromo = () => {
       title: '投票主题',
       dataIndex: 'voteName',
       fixed: 'left',
-      width: 150,
+      width: 222,
+      ellipsis: true,
       ...getColumnSearchProps('投票主题', 'voteName', handleInputSearch, voteName),
     },
     {
@@ -282,7 +283,11 @@ const VotePromo = () => {
             form.resetFields()
 
             setTimeout(() => {
-              form.setFieldsValue(voteType === 10 ? { voteName: '哪个代币获得两天免费推广？' } : { voteName: '' })
+              form.setFieldsValue(
+                voteType === 10
+                  ? { voteName: '哪个代币获得两天免费推广？🚀$$$Which coin to get 2 days free promo? 🚀' }
+                  : { voteName: '' }
+              )
               setState((state) => ({ ...state, voteType }))
             })
           }}
@@ -299,9 +304,9 @@ const VotePromo = () => {
           autoComplete="off"
           labelCol={{ span: 5 }}
           wrapperCol={{ span: 16 }}
-          initialValues={{ voteName: '哪个代币获得两天免费推广？' }}
+          initialValues={{ voteName: '哪个代币获得两天免费推广？🚀$$$Which coin to get 2 days free promo? 🚀' }}
         >
-          <Form.Item label="投票主题" name="voteName" rules={[{ required: true }]}>
+          <Form.Item label="投票主题" name="voteName" rules={[{ required: true, whitespace: true }]}>
             <Input min={1} style={{ width: '100%' }} placeholder="请输入投票主题" />
           </Form.Item>
           <Form.List
