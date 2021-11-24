@@ -1,0 +1,34 @@
+.plusBtn {
+  color: #52c41a;
+  font-size: 20px !important;
+  margin-left: 16px;
+  margin-bottom: 16px;
+}
+
+.iptGrp {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+  position: relative;
+
+  > input {
+    border-bottom-right-radius: 0;
+    border-bottom: 1px solid #ccc !important;
+  }
+
+  .delBtn {
+    position: absolute;
+    font-size: 20px;
+    color: #ff4d4f;
+    right: -16px;
+    opacity: 0;
+    pointer-events: none;
+    cursor: pointer;
+    transition: opacity 100ms;
+  }
+
+  &:hover .delBtn {
+    opacity: 1;
+    pointer-events: inherit;
+  }
+}

@@ -6,7 +6,7 @@
   "logo": "代币图标",
   "clickToUpload": "点击上传",
   "description": "代币描述",
-  "launchDate": "发布日期 UTC+8 (YYYY-MM-DD HH:mm)",
+  "launchDate": "发射日期 UTC+8 (YYYY-MM-DD HH:mm)",
   "coinPresaleDate": "预售开始日期 UTC+8 (YYYY-MM-DD HH:mm)",
   "coinWlsDate": "白名单竞赛日期 UTC+8 (YYYY-MM-DD HH:mm)",
   "contractInfoTitle": "合约信息",

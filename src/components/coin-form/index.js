@@ -6,8 +6,10 @@ import { Form, Input, Button, Row, Col, Select } from 'antd'
 import zh from './lang/zh.json'
 import en from './lang/en.json'
 import { fileDomain, urlReg } from '@/consts'
-import { descPH, additionalLinkPH } from './const'
+import { descPH } from './const'
+
 import ImgUpload from '@/components/img-upload'
+import ExtraLinkAdd from '@/components/extra-link-add'
 
 // 是否中文
 const ifZh = (lang) => lang === 'zh'
@@ -22,8 +24,8 @@ function CoinForm(props) {
   const uploadBtnRef = useRef(null)
   const linkTipRef = useRef(null)
 
-  const [state, setState] = useState({ lang: 'zh', presaleDateR: false, wlsDateR: false, canEdit: true })
-  const { lang, presaleDateR, wlsDateR, canEdit } = state
+  const [state, setState] = useState({ lang: 'zh', presaleDateR: false, canEdit: true })
+  const { lang, presaleDateR, canEdit } = state
 
   useEffect(() => {
     if (!coinInfo?.id) return
@@ -53,8 +55,9 @@ function CoinForm(props) {
     }
 
     const params = { ...values, linkAdditionalInfo: linkAdditionalInfo?.trim() || '' }
-    params.coinPresaleDate = params.coinPresaleDate || '1970-01-01 00:00'
-    params.coinAirdropDate = params.coinAirdropDate || '1970-01-01 00:00'
+    params.coinLaunchDate = params.coinLaunchDate || (!coinInfo?.id ? '' : '1970-01-01 00:00')
+    params.coinPresaleDate = params.coinPresaleDate || (!coinInfo?.id ? '' : '1970-01-01 00:00')
+    params.coinAirdropDate = params.coinAirdropDate || (!coinInfo?.id ? '' : '1970-01-01 00:00')
 
     onOk(params, coinInfo?.id || undefined)
   }
@@ -139,7 +142,7 @@ function CoinForm(props) {
               label={tt.launchDate}
               name="coinLaunchDate"
               validateTrigger="onBlur"
-              rules={[{ required: true }, { pattern: dateReg, message: ' ' }]}
+              rules={[{ pattern: dateReg, message: ' ' }]}
             >
               <Input placeholder="YYYY-MM-DD HH:mm" />
             </Form.Item>
@@ -185,17 +188,13 @@ function CoinForm(props) {
 
             {/* prettier-ignore */}
             <Form.Item label={tt.wlsLink} name="coinAirdropInfo" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
-              <Input placeholder="https://..."  onBlur={e => {
-                const value = e.target?.value?.trim()
-                setState(state => ({...state, wlsDateR: urlReg.test(value)}))
-                if (value === '' || urlReg.test(value)) form.validateFields(['coinAirdropDate'])
-              }}/>
+              <Input placeholder="https://..."  />
             </Form.Item>
             <Form.Item
               label={tt.coinWlsDate}
               name="coinAirdropDate"
               validateTrigger="onBlur"
-              rules={[{ required: wlsDateR }, { pattern: dateReg, message: ' ' }]}
+              rules={[{ pattern: dateReg, message: ' ' }]}
             >
               <Input placeholder="YYYY-MM-DD HH:mm" />
             </Form.Item>
@@ -229,8 +228,8 @@ function CoinForm(props) {
               <Input placeholder="https://..." />
             </Form.Item>
             {/* prettier-ignore */}
-            <Form.Item label={tt.addLinkInfo} name="linkAdditionalInfo" rules={[{ whitespace: true }]}>
-              <Input.TextArea autoSize={{ minRows: 6 }} placeholder={additionalLinkPH} allowClear className={ss.addiInfo}/>
+            <Form.Item label={tt.addLinkInfo} name="linkAdditionalInfo">
+              <ExtraLinkAdd />
             </Form.Item>
 
             <Form.Item noStyle>
@@ -239,7 +238,7 @@ function CoinForm(props) {
             <Form.Item label={tt.contactEmail} name="contactEmail" validateTrigger="onBlur" rules={[{ type: 'email' }]}>
               <Input placeholder="xxxxx@gmail.com" />
             </Form.Item>
-            <Form.Item label={tt.contactTelegram} name="contactTg" rules={[{ required: true, whitespace: true }]}>
+            <Form.Item label={tt.contactTelegram} name="contactTg" rules={[{ whitespace: true }]}>
               <Input placeholder="@Your contact telegram account" />
             </Form.Item>
 
