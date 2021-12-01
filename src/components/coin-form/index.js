@@ -5,8 +5,8 @@ import { Form, Input, Button, Row, Col, Select } from 'antd'
 
 import zh from './lang/zh.json'
 import en from './lang/en.json'
-import { fileDomain, urlReg } from '@/consts'
 import { descPH } from './const'
+import { fileDomain, urlReg } from '@/consts'
 
 import ImgUpload from '@/components/img-upload'
 import ExtraLinkAdd from '@/components/extra-link-add'

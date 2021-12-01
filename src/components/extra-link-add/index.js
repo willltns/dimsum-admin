@@ -2,18 +2,17 @@ import ss from './index.module.less'
 
 import React from 'react'
 import { Input, AutoComplete } from 'antd'
-import { observer } from 'mobx-react'
 import { PlusCircleOutlined, MinusCircleOutlined } from '@ant-design/icons'
 
 import { bscOpt, commonOpt } from './linkOptions'
 import { urlReg } from '@/consts'
 
-const link = { name: '', url: '' }
+const genLink = () => ({ name: '', url: '', key: Math.random() })
 
 const ExtraLinkAdd = (props) => {
   const { value, onChange } = props
 
-  const [links, setLinks] = React.useState([{ ...link }])
+  const [links, setLinks] = React.useState([{ ...genLink() }])
 
   React.useEffect(() => {
     if (!value) return
@@ -22,7 +21,7 @@ const ExtraLinkAdd = (props) => {
       .map((s) => {
         if (!s?.trim()) return undefined
         const [name, url] = s.split('$$$')
-        return { name, url }
+        return { name, url, key: Math.random() }
       })
       .filter(Boolean)
 
@@ -40,21 +39,26 @@ const ExtraLinkAdd = (props) => {
   return (
     <>
       {links.map((item, index) => (
-        <Input.Group className={ss.iptGrp} key={index}>
+        <Input.Group className={ss.iptGrp} key={item.key}>
           <AutoComplete
             value={item.name}
             spellCheck={false}
-            placeholder="Select or input link title."
+            placeholder="选择或输入链接标题"
             options={[...bscOpt, ...commonOpt]}
             style={{ width: 180, flex: 'none' }}
+            getPopupContainer={(tri) => tri.parentNode}
             onChange={(value) => {
-              if (value?.[0] === ' ') return
-              const newLink = { ...links[index], name: value }
+              if (value === ' ') return
+              const newLink = { ...links[index], name: value || '' }
               const newLinks = [...links]
               newLinks.splice(index, 1, newLink)
               setLinks(newLinks)
             }}
             filterOption={(inputValue, option) => option.value.toLowerCase().indexOf(inputValue.toLowerCase()) !== -1}
+            onFocus={(e) => (e.target.parentNode.parentNode.style.backgroundColor = '#fff')}
+            onBlur={(e) =>
+              !e.target.value && (e.target.parentNode.parentNode.style.backgroundColor = 'rgba(255,77,79, 0.05)')
+            }
           />
           &nbsp;:&nbsp;
           <Input
@@ -67,6 +71,8 @@ const ExtraLinkAdd = (props) => {
               newLinks.splice(index, 1, newLink)
               setLinks(newLinks)
             }}
+            onFocus={(e) => (e.target.style.backgroundColor = '#fff')}
+            onBlur={(e) => !urlReg.test(e.target.value) && (e.target.style.backgroundColor = 'rgba(255,77,79, 0.05)')}
           />
           <MinusCircleOutlined
             className={ss.delBtn}
@@ -79,9 +85,9 @@ const ExtraLinkAdd = (props) => {
         </Input.Group>
       ))}
 
-      <PlusCircleOutlined className={ss.plusBtn} onClick={() => setLinks([...links, { ...link }])} />
+      <PlusCircleOutlined className={ss.plusBtn} onClick={() => setLinks([...links, { ...genLink() }])} />
     </>
   )
 }
 
-export default observer(ExtraLinkAdd)
+export default ExtraLinkAdd

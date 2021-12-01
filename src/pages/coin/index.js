@@ -1,4 +1,4 @@
-// import ss from './index.module.less'
+import ss from './index.module.less'
 
 import React, { useEffect, useCallback } from 'react'
 import { observer } from 'mobx-react'
@@ -210,20 +210,6 @@ const CoinMGMT = () => {
       render: (t) => coinChainList?.find((item) => +item.id === +t)?.chainName,
     },
     {
-      title: '投票数',
-      dataIndex: 'coinUpvotes',
-      width: 100,
-      sorter: true,
-      sortOrder: sortedField === 'coinUpvotes' ? sortedOrder : false,
-    },
-    {
-      title: '今日投票数',
-      dataIndex: 'coinUpvotesToday',
-      width: 100,
-      sorter: true,
-      sortOrder: sortedField === 'coinUpvotesToday' ? sortedOrder : false,
-    },
-    {
       title: 'Unique Url',
       dataIndex: 'coinUniqueUrl',
       width: 120,
@@ -241,6 +227,20 @@ const CoinMGMT = () => {
         { text: '否', value: 0 },
       ],
       render: (t) => (+t === 1 ? '是' : '否'),
+    },
+    {
+      title: '投票数',
+      dataIndex: 'coinUpvotes',
+      width: 100,
+      sorter: true,
+      sortOrder: sortedField === 'coinUpvotes' ? sortedOrder : false,
+    },
+    {
+      title: '今日投票数',
+      dataIndex: 'coinUpvotesToday',
+      width: 100,
+      sorter: true,
+      sortOrder: sortedField === 'coinUpvotesToday' ? sortedOrder : false,
     },
     {
       title: '联系邮箱',
@@ -282,13 +282,30 @@ const CoinMGMT = () => {
       sortOrder: sortedField === 'createTime' ? sortedOrder : false,
     },
     {
+      title: '新建人',
+      dataIndex: 'createBy',
+      align: 'center',
+      width: 66,
+    },
+    {
+      title: '修改人',
+      dataIndex: 'modifyBy',
+      align: 'center',
+      width: 66,
+    },
+    {
       title: '状态',
       dataIndex: 'coinStatus',
-      width: 66,
+      width: 76,
       fixed: 'right',
       filteredValue: filteredCoinStatus?.split(',') || null,
       filters: coinStatusList,
-      render: (t) => coinStatusMap[t]?.text,
+      render: (t) => (
+        <span className={ss.coinStatusCol}>
+          <i style={{ backgroundColor: coinStatusMap[t]?.color }} />
+          {coinStatusMap[t]?.text}
+        </span>
+      ),
     },
     {
       title: '操作',
