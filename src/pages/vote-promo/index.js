@@ -1,7 +1,21 @@
 import ss from './index.module.less'
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { Button, Modal, Space, Table, Form, Input, Radio, DatePicker, Col, Popconfirm, Divider, message } from 'antd'
+import {
+  Button,
+  Modal,
+  Space,
+  Table,
+  Form,
+  Input,
+  Radio,
+  DatePicker,
+  Col,
+  Popconfirm,
+  Divider,
+  message,
+  Tooltip,
+} from 'antd'
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons'
 import moment from 'moment'
 import { observer } from 'mobx-react'
@@ -200,9 +214,15 @@ const VotePromo = () => {
     },
     {
       title: '备注',
-      width: 200,
       dataIndex: 'remark',
+      width: 222,
+      ellipsis: true,
       ...getColumnSearchProps('备注', 'remark', handleInputSearch, remark),
+      render: (t) => (
+        <Tooltip title={t} placement="left">
+          {t}
+        </Tooltip>
+      ),
     },
     {
       title: '操作',

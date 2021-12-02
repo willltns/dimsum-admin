@@ -2,10 +2,11 @@ import ss from './index.module.less'
 
 import React, { useEffect, useCallback } from 'react'
 import { observer } from 'mobx-react'
-import { Button, Modal, Space, Table, Popconfirm, Row, message } from 'antd'
+import moment from 'moment'
+import { Button, Modal, Space, Table, Popconfirm, Row, message, Tooltip } from 'antd'
 
 import { addCoin, updateCoin, fetchCoinList, updateCoinStatus, deleteCoin } from '@/pages/coin/xhr'
-import { coinStatusList, coinStatusMap } from '@/consts'
+import { coinStatusList, coinStatusMap, urlReg } from '@/consts'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { useStore } from '@/utils/hooks/useStore'
 
@@ -20,11 +21,11 @@ const CoinMGMT = () => {
   const [state, setState] = React.useState({
     total: 0,
     current: 1,
-    pageSize: 10,
+    pageSize: 20,
     dataSource: [],
     filteredChainType: null,
     filteredAuditStatus: null,
-    filteredPromoted: null,
+    // filteredPromoted: null,
     sortedField: null,
     sortedOrder: null,
     id: '',
@@ -47,7 +48,7 @@ const CoinMGMT = () => {
     dataSource,
     filteredChainType,
     filteredCoinStatus,
-    filteredPromoted,
+    // filteredPromoted,
     sortedField,
     sortedOrder,
     id,
@@ -79,7 +80,7 @@ const CoinMGMT = () => {
       pageSize,
       coinStatus: filteredCoinStatus,
       coinChain: filteredChainType,
-      promoted: filteredPromoted,
+      // promoted: filteredPromoted,
       sortedField,
       sortedOrder,
       id,
@@ -101,7 +102,7 @@ const CoinMGMT = () => {
     pageSize,
     filteredCoinStatus,
     filteredChainType,
-    filteredPromoted,
+    // filteredPromoted,
     sortedField,
     sortedOrder,
     id,
@@ -170,7 +171,7 @@ const CoinMGMT = () => {
       pageSize,
       filteredChainType: coinChain?.join(','),
       filteredCoinStatus: coinStatus?.join(','),
-      filteredPromoted: promoted?.join(','),
+      // filteredPromoted: promoted?.join(','),
       sortedOrder: order,
       sortedField: order ? field : null,
     }))
@@ -203,31 +204,100 @@ const CoinMGMT = () => {
     {
       title: '主网',
       dataIndex: 'coinChain',
-      width: 150,
+      width: 110,
       ellipsis: true,
       filteredValue: filteredChainType?.split(',') || null,
       filters: coinChainList?.map((item) => ({ text: item.chainName, value: item.id })) || [],
       render: (t) => coinChainList?.find((item) => +item.id === +t)?.chainName,
     },
     {
+      title: '合约',
+      dataIndex: 'coinAddress',
+      width: 145,
+      render: (t) => (t.trim() ? `${t.slice(0, 6)}...${t.slice(-7)}` : ''),
+    },
+    {
+      title: '发射时间',
+      dataIndex: 'coinLaunchDate',
+      width: 160,
+      align: 'center',
+      sorter: true,
+      sortOrder: sortedField === 'coinLaunchDate' ? sortedOrder : false,
+      render: (t) =>
+        t &&
+        (moment(t, 'YYYY-MM-DD HH:mm:ss').unix() > common.unixTS ? (
+          <span style={{ color: '#00d62f', fontWeight: 'bold' }}>{t?.slice(0, -3)}</span>
+        ) : (
+          t?.slice(0, -3)
+        )),
+    },
+    {
+      title: '预售时间',
+      dataIndex: 'coinPresaleDate',
+      width: 160,
+      align: 'center',
+      sorter: true,
+      sortOrder: sortedField === 'coinPresaleDate' ? sortedOrder : false,
+      render: (t) =>
+        t &&
+        (moment(t, 'YYYY-MM-DD HH:mm:ss').unix() > common.unixTS ? (
+          <span style={{ color: '#00d62f', fontWeight: 'bold' }}>{t?.slice(0, -3)}</span>
+        ) : (
+          t?.slice(0, -3)
+        )),
+    },
+    {
+      title: '预售地址',
+      dataIndex: 'coinPresaleInfo',
+      width: 160,
+      ellipsis: true,
+      // prettier-ignore
+      render: (t) => urlReg.test(t) && <Tooltip title={t}><a href={t} target="_blank" rel="noreferrer">{t}</a></Tooltip>,
+    },
+    {
+      title: '项目链接',
+      dataIndex: 'linkWebsite',
+      align: 'center',
+      width: 200,
+      render: (_, r) => (
+        <Space size={16}>
+          <Tooltip title={r.linkWebsite}>
+            <a disabled={!r.linkWebsite?.trim()} href={r.linkWebsite} target="_blank" rel="noreferrer">
+              官网
+            </a>
+          </Tooltip>
+          <Tooltip title={r.linkEnglishTg}>
+            <a disabled={!r.linkEnglishTg?.trim()} href={r.linkEnglishTg} target="_blank" rel="noreferrer">
+              英文电报
+            </a>
+          </Tooltip>
+          <Tooltip title={r.linkChineseTg}>
+            <a disabled={!r.linkChineseTg?.trim()} href={r.linkChineseTg} target="_blank" rel="noreferrer">
+              中文电报
+            </a>
+          </Tooltip>
+        </Space>
+      ),
+    },
+    {
       title: 'Unique Url',
       dataIndex: 'coinUniqueUrl',
-      width: 120,
+      width: 125,
       ...getColumnSearchProps('Unique Url', 'coinUniqueUrl', handleInputSearch, contactEmail),
       render: (_, r) => <UniqueUrlCol record={r} afterEdit={handleCoinList} editable={!common.inputorAuth} />,
     },
-    {
-      title: '推广',
-      dataIndex: 'promoted',
-      width: 66,
-      filteredValue: filteredPromoted?.split(',') || null,
-      filterMultiple: false,
-      filters: [
-        { text: '是', value: 1 },
-        { text: '否', value: 0 },
-      ],
-      render: (t) => (+t === 1 ? '是' : '否'),
-    },
+    // {
+    //   title: '推广',
+    //   dataIndex: 'promoted',
+    //   width: 66,
+    //   filteredValue: filteredPromoted?.split(',') || null,
+    //   filterMultiple: false,
+    //   filters: [
+    //     { text: '是', value: 1 },
+    //     { text: '否', value: 0 },
+    //   ],
+    //   render: (t) => (+t === 1 ? '是' : '否'),
+    // },
     {
       title: '投票数',
       dataIndex: 'coinUpvotes',
@@ -241,24 +311,6 @@ const CoinMGMT = () => {
       width: 100,
       sorter: true,
       sortOrder: sortedField === 'coinUpvotesToday' ? sortedOrder : false,
-    },
-    {
-      title: '联系邮箱',
-      dataIndex: 'contactEmail',
-      width: 200,
-      ...getColumnSearchProps('联系邮箱', 'contactEmail', handleInputSearch, contactEmail),
-    },
-    {
-      title: '联系电报',
-      dataIndex: 'contactTg',
-      width: 200,
-      ...getColumnSearchProps('联系电报', 'contactTg', handleInputSearch, contactTg),
-    },
-    {
-      title: '备注',
-      width: 200,
-      dataIndex: 'remark',
-      ...getColumnSearchProps('备注', 'remark', handleInputSearch, remark),
     },
     {
       title: '上市时间',
@@ -285,13 +337,31 @@ const CoinMGMT = () => {
       title: '新建人',
       dataIndex: 'createBy',
       align: 'center',
-      width: 66,
+      width: 77,
     },
     {
       title: '修改人',
       dataIndex: 'modifyBy',
       align: 'center',
-      width: 66,
+      width: 77,
+    },
+    {
+      title: '联系电报',
+      dataIndex: 'contactTg',
+      width: 200,
+      ...getColumnSearchProps('联系电报', 'contactTg', handleInputSearch, contactTg),
+    },
+    {
+      title: '联系邮箱',
+      dataIndex: 'contactEmail',
+      width: 200,
+      ...getColumnSearchProps('联系邮箱', 'contactEmail', handleInputSearch, contactEmail),
+    },
+    {
+      title: '备注',
+      width: 200,
+      dataIndex: 'remark',
+      ...getColumnSearchProps('备注', 'remark', handleInputSearch, remark),
     },
     {
       title: '状态',
