@@ -10,6 +10,7 @@ import {
   CopyrightOutlined,
   BlockOutlined,
   DollarCircleOutlined,
+  FundOutlined,
   InboxOutlined,
   TeamOutlined,
 } from '@ant-design/icons'
@@ -45,6 +46,9 @@ function Sidebar() {
             </Menu.Item>
             <Menu.Item key="/advert" icon={<DollarCircleOutlined />}>
               广告管理
+            </Menu.Item>
+            <Menu.Item key="/promo-request" icon={<FundOutlined />}>
+              广告申请管理
             </Menu.Item>
             <Menu.Item key="/vote-promo" icon={<InboxOutlined />}>
               投票推广管理

@@ -22,6 +22,12 @@ const routes = [
     component: loadableWithSpinner(() => import('../pages/advert')),
   },
   {
+    path: '/promo-request',
+    exact: true,
+    accessRole: [userRoleMap.auditor, userRoleMap.god],
+    component: loadableWithSpinner(() => import('../pages/promo-request')),
+  },
+  {
     path: '/vote-promo',
     exact: true,
     accessRole: [userRoleMap.auditor, userRoleMap.god],

@@ -159,7 +159,7 @@ const CoinMGMT = () => {
 
   const onTableChange = (pagination, filters, sorter) => {
     const { current, pageSize } = pagination
-    const { coinChain, coinStatus, promoted } = filters
+    const { coinChain, coinStatus /*promoted*/ } = filters
     const { field, order } = sorter
 
     // TODO 排序时重置页码，新建重置？
