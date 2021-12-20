@@ -19,7 +19,7 @@ const dateReg =
   /^(((20\d{2})-(0(1|[3-9])|1[012])-(0[1-9]|[12]\d|30))|((20\d{2})-(0[13578]|1[02])-31)|((20\d{2})-02-(0[1-9]|1\d|2[0-8]))|(((20([13579][26]|[2468][048]|0[48]))|(2000))-02-29))\s([0-1][0-9]|2[0-3]):([0-5][0-9])$/
 
 function CoinForm(props) {
-  const { coinInfo, loading, onOk, coinChainList, commonStore } = props
+  const { visible, coinInfo, loading, onOk, coinChainList, commonStore } = props
 
   const uploadBtnRef = useRef(null)
   const linkTipRef = useRef(null)
@@ -40,6 +40,8 @@ function CoinForm(props) {
   const tt = ifZh(lang) ? zh : en
 
   const [form] = Form.useForm()
+
+  useEffect(() => !visible && form.resetFields(), [visible, form])
 
   const onFinish = (values) => {
     const { linkWebsite, linkChineseTg, linkEnglishTg, linkTwitter, linkMedium, linkDiscord, linkAdditionalInfo } =
@@ -118,7 +120,10 @@ function CoinForm(props) {
               <Input placeholder="e.g. Bitcoin" />
             </Form.Item>
             <Form.Item label={tt.symbol} name="coinSymbol" rules={[{ required: true, whitespace: true }]}>
-              <Input placeholder="e.g. BTC" />
+              <Input
+                placeholder="e.g. BTC"
+                onChange={(e) => form.setFieldsValue({ coinSymbol: e.target?.value?.trim() || '' })}
+              />
             </Form.Item>
             <Form.Item
               label={tt.logo}
@@ -160,7 +165,10 @@ function CoinForm(props) {
               </Select>
             </Form.Item>
             <Form.Item label={tt.contractAddress} name="coinAddress" rules={[{ whitespace: true }]}>
-              <Input placeholder="0x000000..." />
+              <Input
+                placeholder="0x000000..."
+                onChange={(e) => form.setFieldsValue({ coinAddress: e.target?.value?.trim() || '' })}
+              />
             </Form.Item>
           </Col>
 
@@ -171,11 +179,15 @@ function CoinForm(props) {
 
             {/* prettier-ignore */}
             <Form.Item label={tt.presaleLink} name="coinPresaleInfo" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
-              <Input placeholder="https://..." onBlur={e => {
-                const value = e.target?.value?.trim()
-                setState(state => ({...state, presaleDateR: urlReg.test(value)}))
-                if (value === '' || urlReg.test(value)) form.validateFields(['coinPresaleDate'])
-              }}/>
+              <Input
+                placeholder="https://..."
+                onBlur={e => {
+                  const value = e.target?.value?.trim()
+                  setState(state => ({...state, presaleDateR: urlReg.test(value)}))
+                  if (value === '' || urlReg.test(value)) form.validateFields(['coinPresaleDate'])
+                }}
+                onChange={(e) => form.setFieldsValue({ coinPresaleInfo: e.target?.value?.trim() || '' })}
+              />
             </Form.Item>
             <Form.Item
               label={tt.coinPresaleDate}
@@ -188,7 +200,7 @@ function CoinForm(props) {
 
             {/* prettier-ignore */}
             <Form.Item label={tt.wlsLink} name="coinAirdropInfo" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
-              <Input placeholder="https://..."  />
+              <Input placeholder="https://..."  onChange={(e) => form.setFieldsValue({ coinAirdropInfo: e.target?.value?.trim() || '' })} />
             </Form.Item>
             <Form.Item
               label={tt.coinWlsDate}
@@ -205,27 +217,27 @@ function CoinForm(props) {
             </Form.Item>
             {/* prettier-ignore */}
             <Form.Item label={tt.website} name="linkWebsite" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
-              <Input placeholder="https://..." />
+              <Input placeholder="https://..." onChange={(e) => form.setFieldsValue({ linkWebsite: e.target?.value?.trim() || '' })}/>
             </Form.Item>
             {/* prettier-ignore */}
             <Form.Item label={tt.chineseTG} name="linkChineseTg" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
-              <Input placeholder="https://..." />
+              <Input placeholder="https://..." onChange={(e) => form.setFieldsValue({ linkChineseTg: e.target?.value?.trim() || '' })}/>
             </Form.Item>
             {/* prettier-ignore */}
             <Form.Item label={tt.englishTG} name="linkEnglishTg" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
-              <Input placeholder="https://..." />
+              <Input placeholder="https://..." onChange={(e) => form.setFieldsValue({ linkEnglishTg: e.target?.value?.trim() || '' })}/>
             </Form.Item>
             {/* prettier-ignore */}
             <Form.Item label={tt.twitter} name="linkTwitter" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
-              <Input placeholder="https://..." />
+              <Input placeholder="https://..." onChange={(e) => form.setFieldsValue({ linkTwitter: e.target?.value?.trim() || '' })}/>
             </Form.Item>
             {/* prettier-ignore */}
             <Form.Item label={tt.medium} name="linkMedium" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
-              <Input placeholder="https://..." />
+              <Input placeholder="https://..." onChange={(e) => form.setFieldsValue({ linkMedium: e.target?.value?.trim() || '' })}/>
             </Form.Item>
             {/* prettier-ignore */}
             <Form.Item label={tt.discord} name="linkDiscord" rules={[{ whitespace: true }, { pattern: urlReg }]} validateTrigger="onBlur">
-              <Input placeholder="https://..." />
+              <Input placeholder="https://..." onChange={(e) => form.setFieldsValue({ linkDiscord: e.target?.value?.trim() || '' })}/>
             </Form.Item>
             {/* prettier-ignore */}
             <Form.Item label={tt.addLinkInfo} name="linkAdditionalInfo">

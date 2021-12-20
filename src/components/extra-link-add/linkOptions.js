@@ -7,11 +7,11 @@ export const commonOpt = [
 ]
 
 export const bscOpt = [
-  { value: 'AveDex Chart' },
-  { value: 'Bogged Chart' },
-  { value: 'PooCoin Chart' },
-  { value: 'DEXTools Chart' },
-  { value: 'PancakeSwap Buy' },
-  { value: 'ApeSwap Buy' },
-  { value: 'Uniswap Buy' },
+  { value: 'AveDex Chart (K线)' },
+  { value: 'Bogged Chart (K线)' },
+  { value: 'PooCoin Chart (K线)' },
+  { value: 'DEXTools Chart (K线)' },
+  { value: 'PancakeSwap Buy (购买)' },
+  { value: 'ApeSwap Buy (购买)' },
+  { value: 'Uniswap Buy (购买)' },
 ]

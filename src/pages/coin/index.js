@@ -6,7 +6,7 @@ import moment from 'moment'
 import { Button, Modal, Space, Table, Popconfirm, Row, message, Tooltip } from 'antd'
 
 import { addCoin, updateCoin, fetchCoinList, updateCoinStatus, deleteCoin } from '@/pages/coin/xhr'
-import { coinStatusList, coinStatusMap, urlReg } from '@/consts'
+import { coinStatusList, coinStatusMap, fileDomain, urlReg } from '@/consts'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { useStore } from '@/utils/hooks/useStore'
 
@@ -15,6 +15,7 @@ import CoinForm from '@/components/coin-form'
 import ChainMGMT from '@/components/chain-mgmt'
 import { fetchChainList } from '@/components/chain-mgmt/xhr'
 import { handleFileUpload } from '@/components/img-upload'
+import ListingConfirmModal from '@/pages/coin/ListingConfirmModal'
 
 const CoinMGMT = () => {
   const { common } = useStore()
@@ -40,6 +41,8 @@ const CoinMGMT = () => {
     tableLoading: false,
     editLoading: false,
     coinChainList: [],
+    listingVisible: false,
+    currentListing: null,
   })
   const {
     total,
@@ -63,6 +66,8 @@ const CoinMGMT = () => {
     tableLoading,
     editLoading,
     coinChainList,
+    listingVisible,
+    currentListing,
   } = state
 
   useEffect(() => {
@@ -131,7 +136,7 @@ const CoinMGMT = () => {
   }
 
   const handleUpdateStatus = async (id, status, coin) => {
-    if (status === 30 && coin.coinSearchPromo) {
+    if (status === 30 && coin?.coinSearchPromo) {
       message.warn('该代币当前为推荐搜索代币，请先取消推荐搜索，再进行下市操作')
       return
     }
@@ -140,7 +145,8 @@ const CoinMGMT = () => {
     try {
       // status 未传时，调用删除接口
       status ? await updateCoinStatus({ id, status }) : await deleteCoin({ id })
-      setState((state) => ({ ...state, editLoading: false }))
+      if (status === 20) message.success(`代币 ${currentListing.coinName} (${currentListing.coinSymbol}) 完成上市`)
+      setState((state) => ({ ...state, editLoading: false, listingVisible: false, currentListing: null }))
       handleCoinList()
     } catch (err) {
       setState((state) => ({ ...state, editLoading: false }))
@@ -200,6 +206,13 @@ const CoinMGMT = () => {
       dataIndex: 'coinSymbol',
       width: 120,
       ...getColumnSearchProps('代币符号', 'coinSymbol', handleInputSearch, coinSymbol),
+    },
+    {
+      title: 'Logo',
+      dataIndex: 'coinLogo',
+      width: 60,
+      align: 'center',
+      render: (t) => <img src={fileDomain + t} alt="logo" style={{ width: 24, height: 24, objectFit: 'cover' }} />,
     },
     {
       title: '主网',
@@ -404,15 +417,14 @@ const CoinMGMT = () => {
               {+r.coinStatus === 10 ? '审核' : '修改'}
             </Button>
 
-            <Popconfirm
-              title={`上市 ${r.coinSymbol} ？`}
+            <Button
+              type="link"
+              size="small"
               disabled={+r.coinStatus === 20}
-              onConfirm={() => handleUpdateStatus(r.id, 20)}
+              onClick={() => setState((state) => ({ ...state, listingVisible: true, currentListing: r }))}
             >
-              <Button type="link" size="small" disabled={+r.coinStatus === 20}>
-                上市
-              </Button>
-            </Popconfirm>
+              上市
+            </Button>
 
             <Popconfirm
               title={`${+r.coinStatus === 10 ? '拒绝' : ''}${+r.coinStatus === 20 ? '下市' : ''}${
@@ -472,6 +484,7 @@ const CoinMGMT = () => {
         bodyStyle={{ height: '80vh', overflowY: 'auto' }}
       >
         <CoinForm
+          visible={modalVisible}
           coinInfo={curModify}
           loading={editLoading}
           onOk={handleEditOk}
@@ -479,6 +492,15 @@ const CoinMGMT = () => {
           commonStore={common}
         />
       </Modal>
+
+      {/* 上市弹窗 */}
+      <ListingConfirmModal
+        visible={listingVisible}
+        current={currentListing || {}}
+        onCancel={() => setState((state) => ({ ...state, listingVisible: false, currentListing: null }))}
+        okLoading={editLoading}
+        onOk={() => handleUpdateStatus(currentListing.id, 20)}
+      />
     </section>
   )
 }

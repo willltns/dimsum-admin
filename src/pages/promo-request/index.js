@@ -155,11 +155,8 @@ const MiUser = () => {
       dataIndex: 'promoService',
       width: 240,
       ...getColumnSearchProps('广告申请服务', 'promoService', handleInputSearch, promoService),
-      render: (t) =>
-        t
-          ?.split('$$$')
-          .reverse()
-          .map((i) => <div key={i}>{i}</div>),
+      // prettier-ignore
+      render: (t) => t?.split('$$$').reverse().map((i) => <div key={i}>{i}</div>),
     },
     {
       title: '申请用户',
