@@ -12,3 +12,5 @@ export const fetchCoinList = (params) => axios.post('/coin/list', clearFalsyFiel
 export const updateCoinStatus = (params) => axios.post('/coin/edit/status', params)
 
 export const deleteCoin = (params) => axios.post('/coin/delete', params)
+
+export const updateCoinVotes = (params) => axios.post('/coin/votes-edit', params)

@@ -6,7 +6,7 @@ function Footer() {
   return (
     <footer className={ss.footer}>
       <h1>YYDSCoins</h1>
-      <p>YYDSCoins © 2021 - contact@yydscoins.com</p>
+      <p>YYDSCoins © 2022 - contact@yydscoins.com</p>
     </footer>
   )
 }

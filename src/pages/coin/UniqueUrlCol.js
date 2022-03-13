@@ -2,7 +2,9 @@ import ss from './index.module.less'
 
 import React, { useState } from 'react'
 import { Input, message, Modal, Tooltip } from 'antd'
+
 import { updateCoin } from '@/pages/coin/xhr'
+import { copy } from '@/utils/copyToClipboard'
 
 function UniqueUrlCol(props) {
   const { record, afterEdit, editable } = props
@@ -16,8 +18,10 @@ function UniqueUrlCol(props) {
     }
 
     setState((state) => ({ ...state, loading: true }))
+
+    const coinUniqueUrl = uniqueVal.replace(/\s+/g, '').toLowerCase()
     try {
-      await updateCoin({ id: record.id, coinUniqueUrl: uniqueVal })
+      await updateCoin({ id: record.id, coinUniqueUrl: coinUniqueUrl || 'null' })
       setState((state) => ({ ...state, visible: false, loading: false }))
       afterEdit()
     } catch (err) {
@@ -25,10 +29,14 @@ function UniqueUrlCol(props) {
     }
   }
 
+  const UIUrl = 'https://www.yydscoins.com/coin/' + record.coinUniqueUrl
+
   return (
     <>
       <div className={ss.uniqueUrlCol}>
-        <Tooltip title={record.coinUniqueUrl}>{record.coinUniqueUrl || '--'}</Tooltip>
+        <Tooltip title={record.coinUniqueUrl}>
+          {record.coinUniqueUrl ? <span onClick={() => copy(UIUrl)}>{record.coinUniqueUrl}</span> : '--'}
+        </Tooltip>
         {editable && (
           <i onClick={() => setState((state) => ({ ...state, visible: true, uniqueVal: record.coinUniqueUrl || '' }))}>
             编辑
@@ -42,6 +50,7 @@ function UniqueUrlCol(props) {
         title="编辑 Unique Url"
         onOk={handleOk}
         destroyOnClose
+        keyboard={!loading}
         closable={!loading}
         maskClosable={false}
         okButtonProps={{ loading }}

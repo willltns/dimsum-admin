@@ -6,17 +6,13 @@ import { Form, Input, Button, Row, Col, Select } from 'antd'
 import zh from './lang/zh.json'
 import en from './lang/en.json'
 import { descPH } from './const'
-import { fileDomain, urlReg } from '@/consts'
+import { fileDomain, urlReg, dateReg } from '@/consts'
 
 import ImgUpload from '@/components/img-upload'
 import ExtraLinkAdd from '@/components/extra-link-add'
 
 // 是否中文
 const ifZh = (lang) => lang === 'zh'
-
-// 日期格式校验 2022-22-22 22:22
-const dateReg =
-  /^(((20\d{2})-(0(1|[3-9])|1[012])-(0[1-9]|[12]\d|30))|((20\d{2})-(0[13578]|1[02])-31)|((20\d{2})-02-(0[1-9]|1\d|2[0-8]))|(((20([13579][26]|[2468][048]|0[48]))|(2000))-02-29))\s([0-1][0-9]|2[0-3]):([0-5][0-9])$/
 
 function CoinForm(props) {
   const { visible, coinInfo, loading, onOk, coinChainList, commonStore } = props
@@ -108,7 +104,7 @@ function CoinForm(props) {
                 coinPresaleDate: coinInfo.coinPresaleDate?.slice(0, -3) || '',
                 coinAirdropDate: coinInfo.coinAirdropDate?.slice(0, -3) || '',
               }
-            : { coinLaunchDate: '2021-00-00 00:00' }
+            : { coinLaunchDate: '2022-00-00 00:00' }
         }
       >
         <Row className={ifZh(lang) ? ss.zhMode : ss.enMode}>

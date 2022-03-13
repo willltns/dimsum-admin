@@ -9,6 +9,7 @@ import { addCoin, updateCoin, fetchCoinList, updateCoinStatus, deleteCoin } from
 import { coinStatusList, coinStatusMap, fileDomain, urlReg } from '@/consts'
 import { getColumnSearchProps } from '@/utils/getColumnSearchProps'
 import { useStore } from '@/utils/hooks/useStore'
+import { copy } from '@/utils/copyToClipboard'
 
 import UniqueUrlCol from './UniqueUrlCol'
 import CoinForm from '@/components/coin-form'
@@ -16,6 +17,7 @@ import ChainMGMT from '@/components/chain-mgmt'
 import { fetchChainList } from '@/components/chain-mgmt/xhr'
 import { handleFileUpload } from '@/components/img-upload'
 import ListingConfirmModal from '@/pages/coin/ListingConfirmModal'
+import VotesModifyModal from '@/pages/coin/VotesModifyModal'
 
 const CoinMGMT = () => {
   const { common } = useStore()
@@ -43,6 +45,7 @@ const CoinMGMT = () => {
     coinChainList: [],
     listingVisible: false,
     currentListing: null,
+    votesVisible: false,
   })
   const {
     total,
@@ -68,6 +71,7 @@ const CoinMGMT = () => {
     coinChainList,
     listingVisible,
     currentListing,
+    votesVisible,
   } = state
 
   useEffect(() => {
@@ -192,6 +196,11 @@ const CoinMGMT = () => {
       fixed: 'left',
       width: 80,
       ...getColumnSearchProps('代币ID', 'id', handleInputSearch, id),
+      render: (t, r) => (
+        <a disabled={r.coinStatus != 20} href={`https://www.yydscoins.com/coin/${t}`} target="_blank" rel="noreferrer">
+          {t}
+        </a>
+      ),
     },
     {
       title: '代币名称',
@@ -227,7 +236,7 @@ const CoinMGMT = () => {
       title: '合约',
       dataIndex: 'coinAddress',
       width: 145,
-      render: (t) => (t.trim() ? `${t.slice(0, 6)}...${t.slice(-7)}` : ''),
+      render: (t) => (t.trim() ? <span onClick={() => copy(t)}>{`${t.slice(0, 6)}...${t.slice(-7)}`}</span> : ''),
     },
     {
       title: '发射时间',
@@ -394,7 +403,7 @@ const CoinMGMT = () => {
       title: '操作',
       align: 'center',
       dataIndex: 'operate',
-      width: common.inputorAuth ? 55 : 160,
+      width: common.inputorAuth ? 55 : 216,
       fixed: 'right',
       render: (_, r) =>
         common.inputorAuth ? (
@@ -409,6 +418,14 @@ const CoinMGMT = () => {
           )
         ) : (
           <Space>
+            <Button
+              type="link"
+              size="small"
+              onClick={() => setState((state) => ({ ...state, votesVisible: true, curModify: r }))}
+            >
+              改票
+            </Button>
+
             <Button
               type="link"
               size="small"
@@ -500,6 +517,12 @@ const CoinMGMT = () => {
         onCancel={() => setState((state) => ({ ...state, listingVisible: false, currentListing: null }))}
         okLoading={editLoading}
         onOk={() => handleUpdateStatus(currentListing.id, 20)}
+      />
+
+      <VotesModifyModal
+        visible={votesVisible}
+        current={curModify}
+        onClose={() => setState((state) => ({ ...state, votesVisible: false, curModify: null }))}
       />
     </section>
   )
