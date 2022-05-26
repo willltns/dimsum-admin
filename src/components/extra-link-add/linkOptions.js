@@ -7,7 +7,7 @@ export const commonOpt = [
 ]
 
 export const bscOpt = [
-  { value: 'AveDex Chart (K线)' },
+  { value: 'Dex Screener (K线)' },
   { value: 'Bogged Chart (K线)' },
   { value: 'PooCoin Chart (K线)' },
   { value: 'DEXTools Chart (K线)' },
